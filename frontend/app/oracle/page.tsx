@@ -168,14 +168,14 @@ export default function OraclePage() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Suggested prompts on empty chat or quick-clicks */}
-        {messages.length === 1 && (
-          <div className="p-4 border-t border-wb-border/30 bg-wb-surface2/20 flex flex-wrap gap-2 justify-center">
+        {/* Suggested prompts — always visible below messages */}
+        {!loading && (
+          <div className="p-3 border-t border-wb-border/30 bg-wb-surface2/20 flex flex-wrap gap-2">
             {SUGGESTED_PROMPTS.map((prompt) => (
               <button
                 key={prompt}
                 onClick={() => handleSend(prompt)}
-                className="btn btn-ghost btn-sm text-[12px] h-8 px-3 rounded-full cursor-pointer hover:border-wb-orange/30 hover:bg-wb-orange/5 text-wb-muted hover:text-wb-text flex items-center gap-1"
+                className="btn btn-ghost btn-sm text-[11px] h-7 px-3 rounded-full cursor-pointer hover:border-wb-orange/30 hover:bg-wb-orange/5 text-wb-muted hover:text-wb-text flex items-center gap-1"
               >
                 {prompt}
                 <ArrowUpRight className="w-3 h-3 text-wb-orange" />
