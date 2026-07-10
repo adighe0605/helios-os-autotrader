@@ -50,14 +50,14 @@ async function getRecentFills(days = 30): Promise<AlpacaFill[]> {
   after.setUTCHours(0, 0, 0, 0);
   const fills: AlpacaFill[] = [];
   let pageToken: string | null = null;
-  for (let p = 0; p < 10; p++) {
-    const q = [
+  for (let page = 0; page < 10; page++) {
+    const queryParts: string[] = [
       "direction=asc",
       "page_size=100",
       `after=${encodeURIComponent(after.toISOString())}`,
-      ...(pageToken ? [`page_token=${encodeURIComponent(pageToken)}`] : []),
-    ].join("&");
-    const batch = await tradingFetch<AlpacaFill[]>(`/v2/account/activities/FILL?${q}`);
+    ];
+    if (pageToken) queryParts.push(`page_token=${encodeURIComponent(pageToken)}`);
+    const batch = await tradingFetch<AlpacaFill[]>(`/v2/account/activities/FILL?${queryParts.join("&")}`);
     fills.push(...batch);
     if (batch.length < 100) break;
     pageToken = batch[batch.length - 1]?.id ?? null;
