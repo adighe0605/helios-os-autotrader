@@ -142,6 +142,11 @@ export async function POST(req: NextRequest) {
       const buys = todayFills.filter((f) => f.side === "buy").length;
       const sells = todayFills.filter((f) => f.side === "sell" || f.side === "sell_short").length;
 
+      // Explain the difference between unrealized mark-to-market and actual fills
+      const pnlSource = todayFills.length === 0 && positions.length > 0
+        ? `\n\n💡 **Why do I have P&L with 0 trades?**\nDay P&L comes from **mark-to-market movement** on your ${positions.length} open position${positions.length > 1 ? "s" : ""}. Even with no new trades today, your held shares gained/lost value as the market moved. This is unrealized P&L — it becomes realized only when you sell.`
+        : "";
+
       return NextResponse.json({
         response:
           `### 📈 Today's Performance\n\n` +
@@ -150,10 +155,11 @@ export async function POST(req: NextRequest) {
           `• **Portfolio Value:** \`$${equity.toLocaleString("en-US", { minimumFractionDigits: 2 })}\`\n` +
           `• **Cash Available:** \`$${parseFloat(acc.cash).toLocaleString("en-US", { minimumFractionDigits: 2 })}\`\n` +
           `• **Fills Today:** \`${todayFills.length}\` (${buys} buys · ${sells} sells)\n` +
-          `• **Open Positions:** \`${positions.length}\`\n\n` +
+          `• **Open Positions:** \`${positions.length}\` (generating unrealized P&L)\n\n` +
           (dayPnl >= 0
-            ? `🟢 You are up on the day. Great trading session!`
-            : `🔴 You are down on the day. Markets move both ways — manage risk carefully.`),
+            ? `🟢 Your portfolio is up today — driven by price movement on existing holdings.`
+            : `🔴 Your portfolio is down today — existing holdings moved against you.`) +
+          pnlSource,
       });
     }
 
