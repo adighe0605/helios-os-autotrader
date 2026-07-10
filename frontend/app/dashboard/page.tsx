@@ -9,6 +9,7 @@ import { fmt } from "@/lib/format";
 import { cn } from "@/lib/format";
 import { AIInsights } from "@/components/AIInsights";
 import { AutoTradePanel } from "@/components/AutoTradePanel";
+import { TradingStrategyCard } from "@/components/TradingStrategyCard";
 import { PennyScanner } from "@/components/PennyScanner";
 import { PortfolioChart } from "@/components/PortfolioChart";
 import { PositionsTable } from "@/components/PositionsTable";
@@ -147,6 +148,7 @@ export default function DashboardPage() {
         </div>
         <div className="space-y-4">
           <AutoTradePanel />
+          <TradingStrategyCard />
           <AIInsights
             headline="Volume surge activity in small-caps"
             body="Penny momentum signals are firing across several names with volume surges 3-5× baseline. The debate committee is filtering high-confidence setups meeting breakout + catalyst criteria. Monitor closely — penny volatility is elevated."
