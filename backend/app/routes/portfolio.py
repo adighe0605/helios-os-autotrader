@@ -14,7 +14,7 @@ def portfolio() -> PortfolioSummary:
     return PortfolioSummary(
         cash=a.cash, equity=a.equity, buying_power=a.buying_power,
         portfolio_value=a.portfolio_value, day_pnl=a.day_pnl, day_pnl_pct=a.day_pnl_pct,
-        total_pnl=a.day_pnl, total_pnl_pct=a.day_pnl_pct,
+        total_pnl=a.total_pnl, total_pnl_pct=a.total_pnl_pct,
         mode=b.mode,
     )
 

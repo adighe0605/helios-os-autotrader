@@ -39,7 +39,20 @@ app.add_middleware(
 
 @app.get("/health")
 def health() -> dict:
-    return {"ok": True, "mode": settings.TRADING_MODE, "env": settings.ENVIRONMENT}
+    has_alpaca_keys = bool(
+        settings.ALPACA_API_KEY_ID
+        and settings.ALPACA_API_SECRET_KEY
+        and settings.ALPACA_API_SECRET_KEY != "YOUR_ALPACA_PAPER_SECRET_HERE"
+    )
+    alpaca_mode = "paper" if "paper" in settings.ALPACA_BASE_URL else "live"
+    return {
+        "ok": True,
+        "mode": settings.TRADING_MODE,
+        "env": settings.ENVIRONMENT,
+        "alpaca_connected": has_alpaca_keys,
+        "alpaca_mode": alpaca_mode if has_alpaca_keys else "disconnected",
+        "data_source": "alpaca" if has_alpaca_keys else "yfinance/mock",
+    }
 
 
 app.include_router(auth.router)

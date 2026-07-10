@@ -25,6 +25,8 @@ class PaperBroker(Broker):
             self._refresh_marks()
             equity = self._cash + sum(p.market_value for p in self._positions.values())
             day_pnl = equity - self._starting_equity
+            total_pnl = sum(p.unrealized_pnl for p in self._positions.values())
+            total_pnl_pct = (total_pnl / self._starting_equity * 100) if self._starting_equity else 0.0
             return BrokerAccount(
                 cash=self._cash,
                 equity=equity,
@@ -32,6 +34,8 @@ class PaperBroker(Broker):
                 portfolio_value=equity,
                 day_pnl=day_pnl,
                 day_pnl_pct=(day_pnl / self._starting_equity) * 100 if self._starting_equity else 0.0,
+                total_pnl=total_pnl,
+                total_pnl_pct=total_pnl_pct,
             )
 
     def positions(self) -> list[BrokerPosition]:

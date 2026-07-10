@@ -26,13 +26,19 @@ class AlpacaBroker(Broker):
         equity = float(a.equity)
         last_equity = float(a.last_equity or a.equity)
         day_pnl = equity - last_equity
+        day_pnl_pct = (day_pnl / last_equity * 100) if last_equity else 0.0
+        # Alpaca provides total unrealized P&L across all open positions
+        total_pnl = float(a.unrealized_pl or 0.0)
+        total_pnl_pct = float(a.unrealized_plpc or 0.0) * 100
         return BrokerAccount(
             cash=float(a.cash),
             equity=equity,
             buying_power=float(a.buying_power),
             portfolio_value=float(a.portfolio_value),
             day_pnl=day_pnl,
-            day_pnl_pct=(day_pnl / last_equity * 100) if last_equity else 0.0,
+            day_pnl_pct=day_pnl_pct,
+            total_pnl=total_pnl,
+            total_pnl_pct=total_pnl_pct,
         )
 
     def positions(self) -> list[BrokerPosition]:

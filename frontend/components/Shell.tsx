@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import useSWR from "swr";
 import {
   BarChart3, Bot, History, Settings, Shield, TrendingUp, Zap,
 } from "lucide-react";
-import { cn } from "@/lib/format";
+import { cn, fmt } from "@/lib/format";
+import { api } from "@/lib/api";
 
 const nav = [
   { href: "/dashboard", label: "Dashboard",  icon: BarChart3  },
@@ -45,6 +47,16 @@ function TickerItem({ s, p, c }: { s: string; p: string; c: string }) {
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
+  const { data: portfolio } = useSWR("shell-portfolio", () => api.portfolio(), { refreshInterval: 15_000 });
+  const { data: health } = useSWR("shell-health", () => api.health(), { refreshInterval: 30_000 });
+
+  const alpacaConnected = (health as any)?.alpaca_connected === true;
+  const alpacaMode = (health as any)?.alpaca_mode ?? "disconnected";
+  const modeLabel = alpacaMode === "paper" ? "PAPER" : alpacaMode === "live" ? "LIVE" : "MOCK";
+  const modeColor = alpacaConnected
+    ? (alpacaMode === "live" ? "bg-wb-green" : "bg-wb-orange")
+    : "bg-wb-dim";
+
   return (
     <div className="min-h-screen flex flex-col bg-wb-bg">
       {/* ── Top ticker bar ─────────────────────────────────────────── */}
@@ -67,17 +79,22 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <span className="text-[10px] uppercase tracking-widest text-wb-muted hidden sm:block">AI Trader</span>
         </Link>
 
-        {/* Account pill */}
+        {/* Account pill — shows real portfolio value from Alpaca */}
         <div className="ml-auto flex items-center gap-3 text-xs">
           <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-wb-surface2 border border-wb-border rounded-sm">
             <Shield className="size-3 text-wb-orange" />
-            <span className="text-wb-muted">Paper</span>
-            <span className="text-wb-text font-semibold num">$100,000.00</span>
+            <span className="text-wb-muted">{modeLabel}</span>
+            <span className="text-wb-text font-semibold num">
+              {portfolio ? fmt.usd(portfolio.portfolio_value) : "—"}
+            </span>
           </div>
-          <span className="hidden md:flex items-center gap-1.5 text-wb-muted">
-            <span className="size-1.5 rounded-full bg-wb-green animate-pulseGlow" />
-            Markets Open
-          </span>
+          {/* Alpaca connection indicator */}
+          <div className="hidden sm:flex items-center gap-1.5 text-wb-muted">
+            <span className={cn("size-1.5 rounded-full", modeColor, alpacaConnected && "animate-pulseGlow")} />
+            <span className="text-[11px]">
+              {alpacaConnected ? `Alpaca ${modeLabel}` : "No Backend"}
+            </span>
+          </div>
         </div>
       </header>
 

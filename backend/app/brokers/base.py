@@ -36,6 +36,8 @@ class BrokerAccount:
     portfolio_value: float
     day_pnl: float
     day_pnl_pct: float
+    total_pnl: float = 0.0
+    total_pnl_pct: float = 0.0
 
 
 class Broker(ABC):
