@@ -134,10 +134,10 @@ export function AutoTradePanel() {
       {/* Stats grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-wb-border border-b border-wb-border">
         {[
-          { label: "Market",   value: marketOpen ? "Open" : "Closed", highlight: marketOpen },
-          { label: "Today",    value: `${status?.trades_today ?? 0} trades` },
-          { label: "Min Conf", value: `${Math.round((status?.min_confidence ?? 0.7) * 100)}%` },
-          { label: "Split",    value: `${Math.round(status?.penny_allocation_pct ?? 70)}% / ${Math.round(status?.other_allocation_pct ?? 30)}%` },
+          { label: "Market",     value: marketOpen ? "Open" : "Closed", highlight: marketOpen },
+          { label: "Today",      value: `${status?.trades_today ?? 0} trades` },
+          { label: "Min Conf",   value: `${Math.round((status?.min_confidence ?? 0.7) * 100)}%` },
+          { label: "Allocation", value: `${Math.round(status?.penny_allocation_pct ?? 70)}% Penny / ${Math.round(status?.other_allocation_pct ?? 30)}% Blue` },
         ].map(({ label, value, highlight }) => (
           <div key={label} className="px-3 py-3 text-center">
             <div className="section-label mb-1">{label}</div>
@@ -167,10 +167,10 @@ export function AutoTradePanel() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {[
               { label: "Min Confidence (%)", placeholder: String(Math.round((status?.min_confidence ?? 0.7) * 100)), state: confInput, set: setConfInput, props: { type: "number", min: 50, max: 100, step: 1 } },
-              { label: "Max Price ($)",       placeholder: String(status?.max_price ?? 5),                          state: maxPriceInput, set: setMaxPriceInput, props: { type: "number", min: 0.1, max: 10, step: 0.5 } },
-              { label: "Max Positions",       placeholder: String(status?.max_concurrent_positions ?? 5),           state: maxConcInput, set: setMaxConcInput, props: { type: "number", min: 1, max: 20, step: 1 } },
-              { label: "Penny Split (%)",     placeholder: String(Math.round(status?.penny_allocation_pct ?? 70)),  state: pennySplitInput, set: setPennySplitInput, props: { type: "number", min: 0, max: 100, step: 1 } },
-              { label: "Other Split (%)",     placeholder: String(Math.round(status?.other_allocation_pct ?? 30)),  state: otherSplitInput, set: setOtherSplitInput, props: { type: "number", min: 0, max: 100, step: 1 } },
+              { label: "Max Penny Price ($)",  placeholder: String(status?.max_price ?? 5),                          state: maxPriceInput, set: setMaxPriceInput, props: { type: "number", min: 0.1, max: 10, step: 0.5 } },
+              { label: "Max Positions",        placeholder: String(status?.max_concurrent_positions ?? 5),           state: maxConcInput, set: setMaxConcInput, props: { type: "number", min: 1, max: 20, step: 1 } },
+              { label: "Penny Alloc (%)",      placeholder: String(Math.round(status?.penny_allocation_pct ?? 70)),  state: pennySplitInput, set: setPennySplitInput, props: { type: "number", min: 0, max: 100, step: 1 } },
+              { label: "Blue Chip Alloc (%)",  placeholder: String(Math.round(status?.other_allocation_pct ?? 30)),  state: otherSplitInput, set: setOtherSplitInput, props: { type: "number", min: 0, max: 100, step: 1 } },
             ].map(({ label, placeholder, state, set, props }) => (
               <div key={label}>
                 <label className="block text-[11px] text-wb-muted mb-1.5">{label}</label>

@@ -59,23 +59,55 @@ def main() -> None:
 
 
 def _run_scan_only() -> None:
-    """Scan penny universe and log candidates without placing orders."""
+    """Scan penny + blue chip universes and log candidates without placing orders."""
     try:
         from app.services.penny_scanner import get_penny_scanner
         scanner = get_penny_scanner()
         candidates = scanner.scan_universe()
         if candidates:
-            logger.info(f"Scan found {len(candidates)} candidate(s):")
+            logger.info(f"PENNY SCAN — {len(candidates)} candidate(s):")
             for c in candidates[:10]:
                 logger.info(
-                    f"  {c['symbol']:6s} ${c['price']:.3f}  "
+                    f"  [PENNY] {c['symbol']:6s} ${c['price']:.3f}  "
                     f"vol_surge={c['volume_surge']:.1f}x  "
                     f"change={c['change_pct']:.2f}%"
                 )
         else:
             logger.info("No penny candidates found this cycle.")
     except Exception as e:
-        logger.exception(f"Scan failed: {e}")
+        logger.exception(f"Penny scan failed: {e}")
+
+    # Blue-chip scan (log only)
+    try:
+        from app.services.market_data import get_market_data
+        from app.agents import AgentContext, DebateEngine
+        from app.agents.momentum import MomentumAgent
+        from app.agents.mean_reversion import MeanReversionAgent
+        _BC_UNIVERSE = [
+            "SPY", "QQQ", "AAPL", "MSFT", "NVDA", "TSLA", "AMZN", "GOOGL", "META", "AMD",
+            "JPM", "V", "SOFI", "PLTR", "BA", "COIN", "UBER", "DKNG",
+        ]
+        md = get_market_data()
+        engine = DebateEngine(agents=[MomentumAgent(), MeanReversionAgent()])
+        bc_hits = []
+        for sym in _BC_UNIVERSE:
+            try:
+                candles = md.candles_df(sym, tf="1d", limit=100)
+                if candles.empty or len(candles) < 50:
+                    continue
+                decision = engine.decide(AgentContext(symbol=sym, candles=candles))
+                if decision.verdict == "buy" and decision.confidence >= 0.60:
+                    bc_hits.append((sym, float(candles["c"].iloc[-1]), decision.confidence))
+            except Exception:
+                continue
+        if bc_hits:
+            logger.info(f"BLUE CHIP SCAN — {len(bc_hits)} qualifying signal(s):")
+            for sym, price, conf in bc_hits[:5]:
+                logger.info(f"  [BLUE CHIP] {sym:6s} ${price:.2f}  conf={conf:.2f}")
+        else:
+            logger.info("No blue-chip signals above threshold this cycle.")
+    except Exception as e:
+        logger.exception(f"Blue-chip scan failed: {e}")
 
 
 def _run_full_cycle() -> None:

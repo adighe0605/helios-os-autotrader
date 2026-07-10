@@ -37,6 +37,14 @@ from app.services.market_data import get_market_data
 from app.services.penny_scanner import get_penny_scanner
 from app.services.risk_manager import get_risk_manager
 
+# Blue-chip universe — liquid names above $5
+_BLUECHIP_UNIVERSE: list[str] = [
+    "SPY", "QQQ", "AAPL", "MSFT", "NVDA", "TSLA", "AMZN", "GOOGL", "META", "AMD",
+    "JPM", "V", "JNJ", "PG", "WMT", "NFLX", "DIS", "BAC", "GS", "PYPL",
+    "SOFI", "PLTR", "BA", "F", "INTC", "CRM", "ADBE", "COST", "HD", "MA",
+    "COIN", "HOOD", "RIVN", "SNAP", "UBER", "DKNG", "RBLX",
+]
+
 # Maximum history records kept in memory
 _MAX_HISTORY = 200
 
@@ -87,6 +95,7 @@ class AutoTrader:
 
         # Penny-tuned debate engine: includes PennyMomentumAgent
         from app.agents.mean_reversion import MeanReversionAgent
+        from app.agents.momentum import MomentumAgent
         from app.agents.risk_agent import RiskAgent
         from app.agents.sentiment import SentimentAgent
         self._engine = DebateEngine(agents=[
@@ -95,6 +104,17 @@ class AutoTrader:
             SentimentAgent(),
             RiskAgent(),
         ])
+        # Blue-chip engine uses broader momentum signals
+        self._bc_engine = DebateEngine(agents=[
+            MomentumAgent(),
+            MeanReversionAgent(),
+            SentimentAgent(),
+            RiskAgent(),
+        ])
+
+        # Allocation split: penny vs blue chip (percentages, sum to 100)
+        self._penny_alloc_pct: float = float(settings.AUTO_PENNY_ALLOCATION_PCT) if hasattr(settings, "AUTO_PENNY_ALLOCATION_PCT") else 70.0
+        self._bc_alloc_pct: float = 100.0 - self._penny_alloc_pct
 
     # ── Status / settings ─────────────────────────────────────────────────────
     def status(self) -> AutoTradeStatus:
@@ -263,6 +283,8 @@ class AutoTrader:
             max_price = self._max_price
             min_volume = self._min_volume
             max_pos_pct = self._max_position_pct
+            penny_alloc = self._penny_alloc_pct
+            bc_alloc = self._bc_alloc_pct
 
         open_auto = len(self._managed_stops)
         if open_auto >= concurrent_limit:
@@ -270,16 +292,26 @@ class AutoTrader:
             self._update_scan_meta()
             return cycle_orders
 
-        # ── Step 3: Scan and enter new positions ─────────────────────────────
+        # Determine slot budgets based on allocation split
+        total_slots = concurrent_limit - open_auto
+        penny_slots = max(1, round(total_slots * penny_alloc / 100))
+        bc_slots    = max(0, total_slots - penny_slots)
+        logger.info(
+            "AutoTrader: {t} open slots — penny={p}, blue_chip={b}",
+            t=total_slots, p=penny_slots, b=bc_slots,
+        )
+
+        # ── Step 3a: Penny stock entries (70% allocation) ─────────────────────
         raw_candidates = scanner.scan_universe(max_price=max_price, min_volume=min_volume)
+        penny_placed = 0
 
         for item in raw_candidates:
-            if open_auto + len(cycle_orders) >= concurrent_limit:
+            if penny_placed >= penny_slots:
                 break
 
             symbol = item["symbol"]
             if symbol in current_positions:
-                continue  # already holding
+                continue
 
             try:
                 candles = md.candles_df(symbol, tf="1d", limit=300)
@@ -300,7 +332,7 @@ class AutoTrader:
                     continue
                 if decision.confidence < min_conf:
                     logger.debug(
-                        "AutoTrader: {s} conf {c:.2f} < threshold {t:.2f}, skip",
+                        "AutoTrader [penny]: {s} conf {c:.2f} < {t:.2f}, skip",
                         s=symbol, c=decision.confidence, t=min_conf,
                     )
                     continue
@@ -315,7 +347,7 @@ class AutoTrader:
                     price=order_price, account=account,
                 )
                 if not check.ok:
-                    logger.info("AutoTrader: risk rejected {s}: {r}", s=symbol, r=check.reason)
+                    logger.info("AutoTrader [penny]: risk rejected {s}: {r}", s=symbol, r=check.reason)
                     continue
 
                 order = broker.place_order(
@@ -334,19 +366,99 @@ class AutoTrader:
                     symbol=symbol, side="buy", qty=qty, price=order_price,
                     order_id=order.id, verdict="buy",
                     confidence=decision.confidence,
-                    reasoning=decision.summary,
+                    reasoning=f"[PENNY] {decision.summary}",
                     stop_loss=decision.stop_loss,
                     take_profit=decision.take_profit,
                 )
                 cycle_orders.append(rec)
-
+                penny_placed += 1
                 logger.info(
-                    "AutoTrader: BUY {s} ×{q} @ {p:.4f} (conf={c:.2f})",
+                    "AutoTrader [penny]: BUY {s} ×{q} @ {p:.4f} (conf={c:.2f})",
                     s=symbol, q=qty, p=order_price, c=decision.confidence,
                 )
 
             except Exception as exc:
-                logger.exception("AutoTrader: cycle error for {s}: {e}", s=symbol, e=exc)
+                logger.exception("AutoTrader [penny]: cycle error for {s}: {e}", s=symbol, e=exc)
+
+        # ── Step 3b: Blue-chip entries (30% allocation) ───────────────────────
+        if bc_slots > 0:
+            bc_placed = 0
+            for symbol in _BLUECHIP_UNIVERSE:
+                if bc_placed >= bc_slots:
+                    break
+                if symbol in current_positions:
+                    continue
+
+                try:
+                    candles = md.candles_df(symbol, tf="1d", limit=300)
+                    if candles.empty or len(candles) < 50:
+                        continue
+
+                    news = md.news(symbol, limit=5)
+                    news_summary = "  ".join(n.headline for n in news)
+                    price = float(candles["c"].iloc[-1])
+                    ctx = AgentContext(
+                        symbol=symbol,
+                        candles=candles,
+                        quote_price=price,
+                        news_summary=news_summary,
+                    )
+                    decision = self._bc_engine.decide(ctx)
+
+                    if decision.verdict != "buy":
+                        continue
+                    if decision.confidence < min_conf:
+                        logger.debug(
+                            "AutoTrader [bluechip]: {s} conf {c:.2f} < {t:.2f}, skip",
+                            s=symbol, c=decision.confidence, t=min_conf,
+                        )
+                        continue
+
+                    # Use 5% per blue chip position (less volatile than pennies)
+                    bc_pos_pct = min(5.0, max_pos_pct * 1.5)
+                    qty = self._size_position(price, account, bc_pos_pct)
+                    if qty < 1:
+                        continue
+
+                    check = risk.check_order(
+                        symbol=symbol, side="buy", qty=qty,
+                        price=price, account=account,
+                    )
+                    if not check.ok:
+                        logger.info("AutoTrader [bluechip]: risk rejected {s}: {r}", s=symbol, r=check.reason)
+                        continue
+
+                    stop_loss  = price * 0.97   # 3% stop for blue chips
+                    take_profit = price * 1.08  # 8% target
+                    order = broker.place_order(
+                        symbol=symbol, side="buy", qty=qty, order_type="market",
+                        take_profit=take_profit, stop_loss=stop_loss,
+                    )
+                    risk.record_trade(realized_pnl=0.0)
+
+                    self._managed_stops[symbol] = {
+                        "stop": stop_loss,
+                        "target": take_profit,
+                        "entry": price,
+                    }
+
+                    rec = self._make_record(
+                        symbol=symbol, side="buy", qty=qty, price=price,
+                        order_id=order.id, verdict="buy",
+                        confidence=decision.confidence,
+                        reasoning=f"[BLUE CHIP] {decision.summary}",
+                        stop_loss=stop_loss,
+                        take_profit=take_profit,
+                    )
+                    cycle_orders.append(rec)
+                    bc_placed += 1
+                    logger.info(
+                        "AutoTrader [bluechip]: BUY {s} ×{q} @ {p:.2f} (conf={c:.2f})",
+                        s=symbol, q=qty, p=price, c=decision.confidence,
+                    )
+
+                except Exception as exc:
+                    logger.exception("AutoTrader [bluechip]: cycle error for {s}: {e}", s=symbol, e=exc)
 
         with self._lock:
             self._history.extend(cycle_orders)

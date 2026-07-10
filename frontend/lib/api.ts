@@ -79,6 +79,8 @@ export const api = {
     req<AutoTradeRecord[]>(`/auto-trade/history?limit=${limit}`, undefined, []),
   pennyScanner: (refreshKey?: string) =>
     req<ScanCandidate[]>(`/auto-trade/scan${refreshKey ? `?r=${encodeURIComponent(refreshKey)}` : ""}`, undefined, []),
+  blueChipScanner: (refreshKey?: string) =>
+    req<ScanCandidate[]>(`/auto-trade/bluechip${refreshKey ? `?r=${encodeURIComponent(refreshKey)}` : ""}`, undefined, []),
   pennyUniverse: () =>
     req<{ symbols: string[] }>("/auto-trade/universe", undefined, { symbols: [] }),
   pennyUniverseAdd: (symbols: string[]) =>
