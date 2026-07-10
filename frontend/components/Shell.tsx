@@ -18,29 +18,36 @@ const nav = [
   { href: "/settings",  label: "Settings",    icon: Settings   },
 ];
 
-const TICKERS = [
-  { s: "AAPL", p: "212.49", c: "+1.24%" },
-  { s: "NVDA", p: "137.82", c: "+2.87%" },
-  { s: "TSLA", p: "248.10", c: "-0.53%" },
-  { s: "AMD",  p: "162.34", c: "+1.92%" },
-  { s: "META", p: "517.20", c: "+0.70%" },
-  { s: "AMZN", p: "190.55", c: "+0.31%" },
-  { s: "MSFT", p: "441.00", c: "+0.88%" },
-  { s: "SNDL", p: "1.24",   c: "+8.45%" },
-  { s: "MMAT", p: "0.93",   c: "+15.2%" },
-  { s: "CLOV", p: "1.87",   c: "+4.10%" },
-  { s: "NAKD", p: "0.72",   c: "+11.8%" },
-  { s: "SPY",  p: "554.20", c: "+0.84%" },
-  { s: "QQQ",  p: "472.60", c: "+1.12%" },
+const FALLBACK_TICKERS = [
+  { s: "AAPL",  p: 212.49, c:  1.24 },
+  { s: "NVDA",  p: 137.82, c:  2.87 },
+  { s: "TSLA",  p: 248.10, c: -0.53 },
+  { s: "AMD",   p: 162.34, c:  1.92 },
+  { s: "META",  p: 517.20, c:  0.70 },
+  { s: "AMZN",  p: 190.55, c:  0.31 },
+  { s: "MSFT",  p: 441.00, c:  0.88 },
+  { s: "GOOGL", p: 178.40, c:  0.65 },
+  { s: "SPY",   p: 554.20, c:  0.84 },
+  { s: "QQQ",   p: 472.60, c:  1.12 },
+  { s: "SNDL",  p:   1.24, c:  8.45 },
+  { s: "MMAT",  p:   0.93, c: 15.20 },
+  { s: "CLOV",  p:   1.87, c:  4.10 },
 ];
 
-function TickerItem({ s, p, c }: { s: string; p: string; c: string }) {
-  const pos = !c.startsWith("-");
+function fmtPrice(p: number) {
+  return p < 10 ? p.toFixed(4) : p < 100 ? p.toFixed(2) : p.toFixed(2);
+}
+
+function TickerItem({ s, p, c }: { s: string; p: number; c: number }) {
+  const pos = c >= 0;
+  const sign = pos ? "+" : "";
   return (
     <span className="inline-flex items-center gap-1.5 px-4 border-r border-wb-border shrink-0">
       <span className="text-wb-muted font-medium text-[11px]">{s}</span>
-      <span className="text-[11px] num text-wb-dim">{p}</span>
-      <span className={cn("text-[11px] num font-semibold", pos ? "pos-text" : "neg-text")}>{c}</span>
+      <span className="text-[11px] num text-wb-dim">{fmtPrice(p)}</span>
+      <span className={cn("text-[11px] num font-semibold", pos ? "pos-text" : "neg-text")}>
+        {sign}{c.toFixed(2)}%
+      </span>
     </span>
   );
 }
@@ -49,6 +56,15 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const { data: portfolio } = useSWR("shell-portfolio", () => api.portfolio(), { refreshInterval: 15_000 });
   const { data: health }    = useSWR("shell-health",    () => api.health(),    { refreshInterval: 30_000 });
+  const { data: tickerData } = useSWR(
+    "shell-tickers",
+    () => fetch("/api/market/ticker-quotes").then((r) => r.json()),
+    { refreshInterval: 30_000, fallbackData: FALLBACK_TICKERS.map((t) => ({ symbol: t.s, price: t.p, change_pct: t.c })) }
+  );
+
+  const tickers: { s: string; p: number; c: number }[] = Array.isArray(tickerData)
+    ? tickerData.map((q: any) => ({ s: q.symbol, p: q.price, c: q.change_pct }))
+    : FALLBACK_TICKERS;
 
   const alpacaConnected = (health as any)?.alpaca_connected === true;
   const alpacaMode      = (health as any)?.alpaca_mode ?? "disconnected";
@@ -61,9 +77,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen h-dvh flex flex-col bg-wb-bg">
 
       {/* ── Ticker bar ──────────────────────────────────────────── */}
-      <div className="h-7 bg-wb-surface/80 border-b border-wb-border overflow-hidden flex items-center backdrop-blur-sm">
-        <div className="ticker-track flex items-center h-full">
-          {[...TICKERS, ...TICKERS].map((t, i) => (
+      <div className="h-7 bg-wb-surface/80 border-b border-wb-border overflow-hidden relative">
+        <div className="ticker-track absolute inset-y-0 left-0 flex items-center">
+          {[...tickers, ...tickers].map((t, i) => (
             <TickerItem key={i} {...t} />
           ))}
         </div>

@@ -766,8 +766,10 @@ main { overscroll-behavior-y: auto; }
 /* ── Ticker bar ──────────────────────────────────────────────────── */
 .ticker-track {
   display: flex;
+  align-items: center;
   white-space: nowrap;
-  animation: tickerScroll 50s linear infinite;
+  will-change: transform;
+  animation: tickerScroll 45s linear infinite;
 }
 .ticker-track:hover { animation-play-state: paused; }
 
