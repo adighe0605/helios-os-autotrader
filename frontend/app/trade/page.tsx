@@ -22,7 +22,7 @@ export default function TradePage() {
           <input
             value={symbol}
             onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-            className="w-36 px-3 py-1.5 bg-wb-surface2 border border-wb-border text-wb-text font-mono uppercase text-sm focus:outline-none focus:border-wb-orange transition-colors"
+            className="w-36 px-3 py-1.5 bg-wb-surface2 border border-wb-border text-wb-text font-mono uppercase text-[12px] focus:outline-none focus:border-wb-orange transition-colors"
             placeholder="SNDL"
           />
         </div>

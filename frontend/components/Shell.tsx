@@ -63,7 +63,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <div className="size-7 rounded-sm bg-wb-orange flex items-center justify-center">
             <Zap className="size-4 text-black" />
           </div>
-          <span className="font-bold text-wb-text tracking-tight text-sm hidden sm:block">Helios</span>
+          <span className="font-bold text-wb-text tracking-tight text-[13px] hidden sm:block">Helios</span>
           <span className="text-[10px] uppercase tracking-widest text-wb-muted hidden sm:block">AI Trader</span>
         </Link>
 

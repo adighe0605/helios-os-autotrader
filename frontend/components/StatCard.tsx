@@ -28,7 +28,7 @@ export function StatCard({ label, value, delta, deltaPrefix, icon: Icon, accent 
 
       <div className="px-4 py-3 pl-5">
         <div className="eyebrow mb-1.5">{label}</div>
-        <div className="text-xl font-bold num text-wb-text tracking-tight">{value}</div>
+        <div className="text-[18px] font-bold num text-wb-text tracking-tight">{value}</div>
         {delta !== undefined && (
           <div className={cn("mt-1 flex items-center gap-0.5 text-xs num font-medium",
             pos ? "pos-text" : "neg-text")}>

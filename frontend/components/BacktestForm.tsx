@@ -81,7 +81,7 @@ export function BacktestForm() {
             ].map(({ label, value, tone }) => (
               <div key={label} className="bg-wb-surface border border-wb-border p-3">
                 <div className="text-[10px] uppercase text-wb-dim tracking-wider mb-1">{label}</div>
-                <div className={cn("text-lg font-bold num", tone)}>{value}</div>
+                <div className={cn("text-[14px] font-bold num", tone)}>{value}</div>
               </div>
             ))}
           </div>

@@ -20,7 +20,7 @@ export function PortfolioChart({ data, height = 200 }: { data: Point[]; height?:
           <span className="text-[10px] text-wb-dim">90-day</span>
         </div>
         <div className="flex items-baseline gap-2">
-          <span className="text-base font-bold num text-wb-text">{fmt.usd(last)}</span>
+          <span className="text-[14px] font-bold num text-wb-text">{fmt.usd(last)}</span>
           <span className={`text-xs num font-semibold ${pos ? "pos-text" : "neg-text"}`}>
             {fmt.pct(pct)}
           </span>

@@ -36,8 +36,8 @@ export function PriceChart({ symbol }: { symbol: string }) {
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-wb-border bg-wb-surface2">
         <div className="flex items-baseline gap-3">
           <span className="font-bold text-wb-text">{symbol}</span>
-          <span className="text-lg font-bold num text-wb-text">{fmt.usd(last)}</span>
-          <span className={cn("text-sm num font-semibold", pos ? "pos-text" : "neg-text")}>
+          <span className="text-[15px] font-bold num text-wb-text">{fmt.usd(last)}</span>
+          <span className={cn("text-[12px] num font-semibold", pos ? "pos-text" : "neg-text")}>
             {fmt.pct(pct)}
           </span>
           {loading && <span className="text-[10px] text-wb-dim">…</span>}
