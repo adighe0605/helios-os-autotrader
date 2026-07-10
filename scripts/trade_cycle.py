@@ -27,14 +27,21 @@ def is_market_open() -> bool:
 def main() -> None:
     dry_run = os.environ.get("DRY_RUN", "false").lower() == "true"
     autonomous = os.environ.get("AUTONOMOUS_MODE", "false").lower() == "true"
+    eod_mode = os.environ.get("EOD_MODE", "false").lower() == "true"
 
     logger.info("=" * 60)
     logger.info("Helios AI Trader — Trade Cycle")
     logger.info(f"  Time (UTC):      {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')}")
     logger.info(f"  Autonomous mode: {autonomous}")
     logger.info(f"  Dry run:         {dry_run}")
+    logger.info(f"  EOD mode:        {eod_mode}")
     logger.info(f"  Market open:     {is_market_open()}")
     logger.info("=" * 60)
+
+    if eod_mode:
+        logger.info("EOD_MODE=true — flattening all positions before market close")
+        _run_eod_flatten()
+        return
 
     if not is_market_open():
         logger.info("Market is closed — skipping trade cycle.")
@@ -45,7 +52,6 @@ def main() -> None:
             "AUTONOMOUS_MODE=false — no trades will be placed. "
             "Set AUTONOMOUS_MODE=true in GitHub Actions secrets to enable real trading."
         )
-        # Still run a scan to log what the bot WOULD have done
         _run_scan_only()
         return
 
@@ -54,7 +60,6 @@ def main() -> None:
         _run_scan_only()
         return
 
-    # Full autonomous cycle
     _run_full_cycle()
 
 
@@ -108,6 +113,22 @@ def _run_scan_only() -> None:
             logger.info("No blue-chip signals above threshold this cycle.")
     except Exception as e:
         logger.exception(f"Blue-chip scan failed: {e}")
+
+
+def _run_eod_flatten() -> None:
+    """Close all managed positions before end of day to lock in intraday profits."""
+    try:
+        from app.services.auto_trader import get_auto_trader
+        trader = get_auto_trader()
+        orders = trader.run_cycle()  # EOD logic is triggered inside run_cycle via is_eod_time()
+        if orders:
+            logger.info(f"EOD flatten: {len(orders)} position(s) closed:")
+            for o in orders:
+                logger.info(f"  SELL {o.qty} {o.symbol} @ ${o.price:.4f}")
+        else:
+            logger.info("EOD flatten: no open managed positions to close.")
+    except Exception as e:
+        logger.exception(f"EOD flatten failed: {e}")
 
 
 def _run_full_cycle() -> None:

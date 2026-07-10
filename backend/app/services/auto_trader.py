@@ -49,6 +49,19 @@ _BLUECHIP_UNIVERSE: list[str] = [
 _MAX_HISTORY = 200
 
 
+def is_eod_time() -> bool:
+    """Return True when it's time to close all positions (3:40–4:00 PM ET)."""
+    try:
+        from zoneinfo import ZoneInfo
+        from datetime import time as dtime
+        now_et = datetime.now(ZoneInfo("America/New_York"))
+        return now_et.weekday() < 5 and now_et.time() >= dtime(15, 40)
+    except Exception:
+        # UTC fallback: 19:40+ UTC on weekdays
+        now_utc = datetime.now(timezone.utc)
+        return now_utc.weekday() < 5 and now_utc.hour >= 19 and now_utc.minute >= 40
+
+
 def is_market_open() -> bool:
     """Return True during NYSE/NASDAQ regular hours (9:30–16:00 ET, Mon–Fri).
 
@@ -98,6 +111,7 @@ class AutoTrader:
         from app.agents.momentum import MomentumAgent
         from app.agents.risk_agent import RiskAgent
         from app.agents.sentiment import SentimentAgent
+        from app.agents.intraday import IntradayAgent
         self._engine = DebateEngine(agents=[
             PennyMomentumAgent(),
             MeanReversionAgent(),
@@ -111,10 +125,14 @@ class AutoTrader:
             SentimentAgent(),
             RiskAgent(),
         ])
+        # Standalone intraday agent for 5m timing confirmation
+        self._intraday_agent = IntradayAgent()
 
         # Allocation split: penny vs blue chip (percentages, sum to 100)
         self._penny_alloc_pct: float = float(settings.AUTO_PENNY_ALLOCATION_PCT) if hasattr(settings, "AUTO_PENNY_ALLOCATION_PCT") else 70.0
         self._bc_alloc_pct: float = 100.0 - self._penny_alloc_pct
+        # Track per-symbol intraday high for trailing stop calculation
+        self._intraday_highs: dict[str, float] = {}
 
     # ── Status / settings ─────────────────────────────────────────────────────
     def status(self) -> AutoTradeStatus:
@@ -245,21 +263,14 @@ class AutoTrader:
 
         cycle_orders: list[AutoTradeRecord] = []
 
-        # ── Step 1: Manage existing positions ────────────────────────────────
-        for symbol, pos in list(current_positions.items()):
-            if symbol not in self._managed_stops:
-                continue
-            stop_info = self._managed_stops[symbol]
-            cur_price = pos.current_price
-            if cur_price <= 0:
-                continue
-
-            hit_stop = cur_price <= stop_info.get("stop", 0)
-            hit_target = cur_price >= stop_info.get("target", float("inf"))
-
-            if hit_stop or hit_target:
-                reason = "stop_loss" if hit_stop else "take_profit"
-                logger.info("AutoTrader: closing {s} at {p:.4f} ({r})", s=symbol, p=cur_price, r=reason)
+        # ── Step 0: EOD flatten — close everything before 3:45 PM ET ─────────
+        if is_eod_time():
+            logger.info("AutoTrader: EOD — flattening all positions before close")
+            for symbol, pos in list(current_positions.items()):
+                if symbol not in self._managed_stops:
+                    continue
+                stop_info = self._managed_stops[symbol]
+                cur_price = pos.current_price
                 try:
                     order = broker.place_order(
                         symbol=symbol, side="sell", qty=pos.qty, order_type="market"
@@ -269,10 +280,95 @@ class AutoTrader:
                     rec = self._make_record(
                         symbol=symbol, side="sell", qty=pos.qty, price=cur_price,
                         order_id=order.id, verdict="sell", confidence=1.0,
-                        reasoning=f"Auto-close: {reason} triggered @ {cur_price:.4f}",
+                        reasoning=f"[EOD FLATTEN] Market close approaching — locking intraday profit",
                     )
                     cycle_orders.append(rec)
                     self._managed_stops.pop(symbol, None)
+                    self._intraday_highs.pop(symbol, None)
+                    logger.info("AutoTrader [EOD]: closed {s} @ {p:.4f} P&L={pnl:+.2f}", s=symbol, p=cur_price, pnl=pnl)
+                except Exception as e:
+                    logger.error("AutoTrader [EOD]: close failed for {s}: {e}", s=symbol, e=e)
+            with self._lock:
+                self._history.extend(cycle_orders)
+                self._trades_today += len(cycle_orders)
+            self._update_scan_meta()
+            return cycle_orders
+
+        # ── Step 1: Manage existing positions (stops + trailing + intraday exit)
+        for symbol, pos in list(current_positions.items()):
+            if symbol not in self._managed_stops:
+                continue
+            stop_info = self._managed_stops[symbol]
+            cur_price = pos.current_price
+            if cur_price <= 0:
+                continue
+
+            # Track intraday high for trailing stop
+            prev_high = self._intraday_highs.get(symbol, stop_info.get("entry", cur_price))
+            if cur_price > prev_high:
+                self._intraday_highs[symbol] = cur_price
+
+            intraday_high = self._intraday_highs.get(symbol, cur_price)
+            entry = stop_info.get("entry", cur_price)
+
+            # Trailing stop logic: ratchet stop up as price rises
+            # After 3% gain → move stop to breakeven
+            # After 5% gain → trail at 50% of max gain from entry
+            gain_pct = (cur_price - entry) / entry if entry > 0 else 0
+            current_stop = stop_info.get("stop", 0)
+            if gain_pct >= 0.05:
+                # Trail at 50% of the gain from entry
+                new_trailing_stop = entry + (intraday_high - entry) * 0.50
+                if new_trailing_stop > current_stop:
+                    stop_info["stop"] = new_trailing_stop
+                    logger.info(
+                        "AutoTrader [trail]: {s} stop raised to {ns:.4f} (gain={g:.1f}%)",
+                        s=symbol, ns=new_trailing_stop, g=gain_pct * 100,
+                    )
+            elif gain_pct >= 0.03:
+                # Move to breakeven
+                if entry > current_stop:
+                    stop_info["stop"] = entry
+                    logger.info("AutoTrader [trail]: {s} stop moved to breakeven {e:.4f}", s=symbol, e=entry)
+
+            hit_stop   = cur_price <= stop_info.get("stop", 0)
+            hit_target = cur_price >= stop_info.get("target", float("inf"))
+
+            # Intraday re-evaluation: if 5m signal turns bearish on a winning position
+            intraday_exit = False
+            if not hit_stop and not hit_target and gain_pct > 0:
+                try:
+                    intraday_df = md.candles_df(symbol, tf="5m", limit=78)
+                    if not intraday_df.empty and len(intraday_df) >= 6:
+                        from app.agents.base import AgentContext as _AC
+                        ctx_5m = _AC(symbol=symbol, candles=intraday_df, quote_price=cur_price)
+                        signal_5m = self._intraday_agent.evaluate(ctx_5m)
+                        if signal_5m.verdict == "sell" and gain_pct > 0.01:
+                            intraday_exit = True
+                            logger.info(
+                                "AutoTrader [intraday-exit]: {s} — 5m signal turned bearish while in profit, exiting",
+                                s=symbol,
+                            )
+                except Exception:
+                    pass
+
+            if hit_stop or hit_target or intraday_exit:
+                reason = "stop_loss" if hit_stop else ("take_profit" if hit_target else "intraday_reversal")
+                logger.info("AutoTrader: closing {s} at {p:.4f} ({r})", s=symbol, p=cur_price, r=reason)
+                try:
+                    order = broker.place_order(
+                        symbol=symbol, side="sell", qty=pos.qty, order_type="market"
+                    )
+                    pnl = (cur_price - entry) * pos.qty
+                    risk.record_trade(realized_pnl=pnl)
+                    rec = self._make_record(
+                        symbol=symbol, side="sell", qty=pos.qty, price=cur_price,
+                        order_id=order.id, verdict="sell", confidence=1.0,
+                        reasoning=f"Auto-close: {reason} triggered @ {cur_price:.4f} (P&L={pnl:+.2f})",
+                    )
+                    cycle_orders.append(rec)
+                    self._managed_stops.pop(symbol, None)
+                    self._intraday_highs.pop(symbol, None)
                 except Exception as e:
                     logger.error("AutoTrader: close order failed for {s}: {e}", s=symbol, e=e)
 
@@ -336,6 +432,27 @@ class AutoTrader:
                         s=symbol, c=decision.confidence, t=min_conf,
                     )
                     continue
+
+                # 5m intraday confirmation — require VWAP/ORB signal before entering
+                try:
+                    intraday_df = md.candles_df(symbol, tf="5m", limit=78)
+                    if not intraday_df.empty and len(intraday_df) >= 6:
+                        ctx_5m = AgentContext(symbol=symbol, candles=intraday_df, quote_price=item["price"])
+                        signal_5m = self._intraday_agent.evaluate(ctx_5m)
+                        if signal_5m.verdict == "sell":
+                            logger.debug("AutoTrader [penny]: {s} blocked by intraday bearish signal", s=symbol)
+                            continue
+                        # Blend confidence: daily 60% + intraday 40%
+                        blended_conf = decision.confidence * 0.60 + signal_5m.confidence * 0.40
+                        decision = type(decision)(
+                            verdict=decision.verdict,
+                            confidence=blended_conf,
+                            summary=f"{decision.summary} | 5m: {signal_5m.reasoning}",
+                            stop_loss=decision.stop_loss,
+                            take_profit=decision.take_profit,
+                        )
+                except Exception:
+                    pass  # proceed with daily signal only if 5m data unavailable
 
                 qty = self._size_position(item["price"], account, max_pos_pct)
                 if qty < 1:
@@ -413,6 +530,26 @@ class AutoTrader:
                             s=symbol, c=decision.confidence, t=min_conf,
                         )
                         continue
+
+                    # 5m intraday confirmation for blue chips
+                    try:
+                        intraday_df = md.candles_df(symbol, tf="5m", limit=78)
+                        if not intraday_df.empty and len(intraday_df) >= 6:
+                            ctx_5m = AgentContext(symbol=symbol, candles=intraday_df, quote_price=price)
+                            signal_5m = self._intraday_agent.evaluate(ctx_5m)
+                            if signal_5m.verdict == "sell":
+                                logger.debug("AutoTrader [bluechip]: {s} blocked by intraday bearish signal", s=symbol)
+                                continue
+                            blended_conf = decision.confidence * 0.60 + signal_5m.confidence * 0.40
+                            decision = type(decision)(
+                                verdict=decision.verdict,
+                                confidence=blended_conf,
+                                summary=f"{decision.summary} | 5m: {signal_5m.reasoning}",
+                                stop_loss=decision.stop_loss,
+                                take_profit=decision.take_profit,
+                            )
+                    except Exception:
+                        pass
 
                     # Use 5% per blue chip position (less volatile than pennies)
                     bc_pos_pct = min(5.0, max_pos_pct * 1.5)
@@ -505,7 +642,13 @@ class AutoTrader:
 
     def _update_scan_meta(self) -> None:
         with self._lock:
-            self._last_scan_at = datetime.now(timezone.utc)
+            now = datetime.now(timezone.utc)
+            # Reset trades_today counter at midnight UTC
+            if self._last_scan_at and self._last_scan_at.date() < now.date():
+                self._trades_today = 0
+                self._intraday_highs.clear()
+                logger.info("AutoTrader: new trading day — counters reset")
+            self._last_scan_at = now
             self._scan_count += 1
 
 

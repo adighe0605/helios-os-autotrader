@@ -2,14 +2,21 @@ name: 🤖 Auto Trade Bot
 
 on:
   schedule:
-    # Every 5 minutes, Mon–Fri, 9:30 AM – 4:00 PM ET (13:30–20:00 UTC)
-    - cron: "*/5 13-20 * * 1-5"
+    # Intraday scan: Every 5 minutes, Mon–Fri, 9:30 AM – 3:35 PM ET (13:30–19:35 UTC)
+    - cron: "*/5 13-19 * * 1-5"
+    # EOD flatten: 3:40 PM ET sharp (19:40 UTC) Mon–Fri
+    - cron: "40 19 * * 1-5"
   workflow_dispatch:
     inputs:
       dry_run:
         description: "Dry run (no real orders)"
         required: false
         default: "true"
+        type: boolean
+      eod_mode:
+        description: "EOD flatten mode (close all positions)"
+        required: false
+        default: "false"
         type: boolean
 
 jobs:
@@ -61,4 +68,6 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET || 'dev-jwt' }}
           DATABASE_URL: "sqlite:///./aitrader.db"
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          # EOD mode: set by manual dispatch OR by the 3:40 PM cron via time check inside script
+          EOD_MODE: ${{ github.event.inputs.eod_mode || 'false' }}
         run: python scripts/trade_cycle.py
