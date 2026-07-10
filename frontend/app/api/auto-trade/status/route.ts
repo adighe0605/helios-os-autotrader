@@ -7,7 +7,8 @@ const AUTO_TRADE_COOKIE = "helios_auto_trade_enabled";
 export async function GET(req: NextRequest) {
   const state = getAutoTradeState();
   const cookieEnabled = req.cookies.get(AUTO_TRADE_COOKIE)?.value;
-  const enabled = cookieEnabled === "1" ? true : cookieEnabled === "0" ? false : state.enabled;
+  // Default ON — only disable if cookie explicitly set to "0"
+  const enabled = cookieEnabled === "0" ? false : true;
   return NextResponse.json({
     ...state,
     enabled,

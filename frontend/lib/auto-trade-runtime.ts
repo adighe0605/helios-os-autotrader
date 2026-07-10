@@ -23,8 +23,8 @@ function defaults(): AutoTradeRuntimeState {
   const normalizedPenny = total > 0 ? Math.round((penny / total) * 100) : 70;
   const normalizedOther = 100 - normalizedPenny;
   return {
-    enabled: process.env.AUTONOMOUS_MODE === "true",
-    min_confidence: parseFloat(process.env.AUTO_MIN_CONFIDENCE ?? "0.70"),
+    enabled: process.env.AUTONOMOUS_MODE === "false" ? false : true,
+    min_confidence: parseFloat(process.env.AUTO_MIN_CONFIDENCE ?? "0.60"),
     max_price: parseFloat(process.env.PENNY_MAX_PRICE ?? "5.0"),
     min_volume: parseInt(process.env.PENNY_MIN_VOLUME ?? "300000", 10),
     max_position_pct: parseFloat(process.env.AUTO_MAX_POSITION_PCT ?? "3.0"),

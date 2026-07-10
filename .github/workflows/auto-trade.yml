@@ -43,8 +43,8 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ANTHROPIC_MODEL: claude-opus-4-7
           ANTHROPIC_FAST_MODEL: claude-haiku-4-5-20251001
-          AUTONOMOUS_MODE: ${{ secrets.AUTONOMOUS_MODE || 'false' }}
-          AUTO_MIN_CONFIDENCE: ${{ secrets.AUTO_MIN_CONFIDENCE || '0.70' }}
+          AUTONOMOUS_MODE: ${{ secrets.AUTONOMOUS_MODE || 'true' }}
+          AUTO_MIN_CONFIDENCE: ${{ secrets.AUTO_MIN_CONFIDENCE || '0.60' }}
           AUTO_MAX_POSITION_PCT: "3.0"
           AUTO_MAX_CONCURRENT_POSITIONS: "5"
           PENNY_MAX_PRICE: "5.00"
