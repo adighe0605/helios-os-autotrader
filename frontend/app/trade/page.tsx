@@ -16,23 +16,23 @@ export default function TradePage() {
   return (
     <div className="space-y-3">
       {/* WeBull-style header with symbol search */}
-      <div className="flex items-center justify-between border-b border-wb-border pb-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-wb-border pb-2">
         <h1 className="text-[13px] font-semibold text-wb-text">Order Entry</h1>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <input
             value={symbol}
             onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-            className="w-36 px-3 py-1.5 bg-wb-surface2 border border-wb-border text-wb-text font-mono uppercase text-[12px] focus:outline-none focus:border-wb-orange transition-colors"
+            className="flex-1 sm:w-36 px-3 py-2.5 min-h-[40px] bg-wb-surface2 border border-wb-border text-wb-text font-mono uppercase text-[12px] focus:outline-none focus:border-wb-orange transition-colors"
             placeholder="SNDL"
           />
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
         <div className="lg:col-span-2 space-y-2">
           <PriceChart symbol={symbol} />
           {/* Quote strip — WeBull style */}
-          <div className="bg-wb-surface border border-wb-border grid grid-cols-2 sm:grid-cols-5 divide-x divide-wb-border">
+          <div className="bg-wb-surface border border-wb-border grid grid-cols-2 sm:grid-cols-5 divide-wb-border divide-y sm:divide-y-0 sm:divide-x">
             {[
               { label: "Last",   value: quote ? fmt.usd(quote.price) : "—", cls: "" },
               { label: "Change", value: quote ? fmt.pct(quote.change_pct) : "—",

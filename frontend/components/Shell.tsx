@@ -126,7 +126,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 overflow-auto px-4 sm:px-5 py-4">{children}</main>
+        <main className="flex-1 overflow-auto px-4 sm:px-5 py-4 pb-20 md:pb-4">{children}</main>
       </div>
 
       {/* ── Mobile bottom nav ───────────────────────────────────────── */}
@@ -136,7 +136,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           const Icon = n.icon;
           return (
             <Link key={n.href} href={n.href}
-              className={cn("flex flex-col items-center gap-0.5 text-[10px]",
+              className={cn("flex flex-col items-center justify-center gap-0.5 text-[10px] flex-1 h-full",
                 active ? "text-wb-orange" : "text-wb-dim")}
             >
               <Icon className="size-5" />

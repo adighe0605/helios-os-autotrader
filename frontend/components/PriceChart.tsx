@@ -33,8 +33,8 @@ export function PriceChart({ symbol }: { symbol: string }) {
   return (
     <div className="bg-wb-surface border border-wb-border overflow-hidden">
       {/* Title row */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-wb-border bg-wb-surface2">
-        <div className="flex items-baseline gap-3">
+      <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 border-b border-wb-border bg-wb-surface2">
+        <div className="flex items-baseline gap-3 flex-1 min-w-0">
           <span className="font-bold text-wb-text">{symbol}</span>
           <span className="text-[15px] font-bold num text-wb-text">{fmt.usd(last)}</span>
           <span className={cn("text-[12px] num font-semibold", pos ? "pos-text" : "neg-text")}>
@@ -42,12 +42,12 @@ export function PriceChart({ symbol }: { symbol: string }) {
           </span>
           {loading && <span className="text-[10px] text-wb-dim">…</span>}
         </div>
-        {/* Timeframe buttons — WeBull style */}
-        <div className="flex gap-px bg-wb-surface3 border border-wb-border rounded-sm overflow-hidden">
+        {/* Timeframe buttons */}
+        <div className="flex gap-px bg-wb-surface3 border border-wb-border rounded-sm overflow-hidden shrink-0">
           {(["1d", "1w", "1m", "3m", "1y"] as Tf[]).map((k) => (
             <button key={k} onClick={() => setTf(k)}
               className={cn(
-                "px-2.5 py-1 text-[11px] font-medium transition",
+                "px-2.5 py-2 min-h-[36px] text-[11px] font-medium transition",
                 tf === k
                   ? "bg-wb-orange text-black"
                   : "text-wb-muted hover:text-wb-text hover:bg-wb-surface3"
@@ -59,8 +59,8 @@ export function PriceChart({ symbol }: { symbol: string }) {
       </div>
 
       {/* Chart */}
-      <div style={{ width: "100%", height: 260 }}>
-        <ResponsiveContainer>
+      <div className="w-full h-[180px] sm:h-[260px]">
+        <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 8, left: 0, right: 0, bottom: 0 }}>
             <defs>
               <linearGradient id={`gPriceWb-${symbol}`} x1="0" y1="0" x2="0" y2="1">

@@ -19,7 +19,7 @@ function verdictClass(v: AgentSignal["verdict"]) {
 
 export function AgentDebate({ decision }: { decision: TradeDecision }) {
   return (
-    <div className="grid lg:grid-cols-3 gap-2">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
       {/* Verdict panel */}
       <div className="lg:col-span-2 bg-wb-surface border border-wb-border overflow-hidden">
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-wb-border bg-wb-surface2">
@@ -37,7 +37,7 @@ export function AgentDebate({ decision }: { decision: TradeDecision }) {
           </div>
           <p className="text-[12px] leading-relaxed text-wb-muted">{decision.summary}</p>
           {decision.stop_loss && decision.take_profit && (
-            <div className="mt-4 grid grid-cols-3 gap-2">
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
               <Pill label="Stop Loss"   value={`$${decision.stop_loss}`}   tone="neg" />
               <Pill label="Take Profit" value={`$${decision.take_profit}`} tone="pos" />
               <Pill label="Risk:Reward" value={decision.risk_reward ? `1 : ${decision.risk_reward}` : "—"} tone="orange" />

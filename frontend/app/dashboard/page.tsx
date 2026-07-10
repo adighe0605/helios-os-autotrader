@@ -30,8 +30,8 @@ export default function DashboardPage() {
         <span className="text-[11px] text-wb-dim num">{fmt.time(new Date().toISOString())}</span>
       </div>
 
-      {/* Stat cards — WeBull compact row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+      {/* Stat cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
         <StatCard label="Portfolio Value"
           value={portfolio ? fmt.usd(portfolio.portfolio_value) : "—"}
           delta={portfolio?.day_pnl_pct} icon={Wallet} accent="default" />
@@ -49,7 +49,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Main content grid */}
-      <div className="grid lg:grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
         <div className="lg:col-span-2 space-y-2">
           <PortfolioChart data={curve} />
           <PositionsTable positions={positions ?? []} />

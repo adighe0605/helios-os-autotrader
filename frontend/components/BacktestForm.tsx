@@ -62,7 +62,7 @@ export function BacktestForm() {
           </div>
           <div className="mt-4 flex justify-end">
             <button onClick={run} disabled={loading}
-              className="px-4 py-2 bg-wb-orange text-black text-[12px] font-bold disabled:opacity-50 hover:brightness-110 transition">
+              className="px-4 py-2.5 min-h-[40px] bg-wb-orange text-black text-[12px] font-bold disabled:opacity-50 hover:brightness-110 transition">
               {loading ? "Running…" : "Run Backtest"}
             </button>
           </div>
@@ -91,8 +91,8 @@ export function BacktestForm() {
             <div className="px-4 py-2.5 border-b border-wb-border bg-wb-surface2">
               <span className="text-[11px] font-semibold text-wb-text">Equity Curve</span>
             </div>
-            <div style={{ width: "100%", height: 260 }}>
-              <ResponsiveContainer>
+            <div className="w-full h-[180px] sm:h-[260px]">
+              <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={result.equity_curve} margin={{ top: 8, left: 0, right: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="gBT" x1="0" y1="0" x2="0" y2="1">

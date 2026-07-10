@@ -100,12 +100,12 @@ export function AutoTradePanel() {
         </div>
         <div className="flex items-center gap-1">
           <button onClick={() => setShowSettings(!showSettings)}
-            className="p-1.5 hover:bg-wb-surface3 rounded-sm transition-colors text-wb-dim hover:text-wb-muted">
+            className="p-2.5 hover:bg-wb-surface3 rounded-sm transition-colors text-wb-dim hover:text-wb-muted">
             <Settings size={12} />
           </button>
           <button onClick={toggleEnabled} disabled={saving}
             className={cn(
-              "flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 border transition disabled:opacity-50",
+              "flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-2 min-h-[36px] border transition disabled:opacity-50",
               enabled
                 ? "bg-wb-red-dim text-wb-red border-wb-red/25 hover:bg-wb-red/15"
                 : "bg-wb-green-dim text-wb-green border-wb-green/25 hover:bg-wb-green/15"
@@ -117,7 +117,7 @@ export function AutoTradePanel() {
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-4 divide-x divide-wb-border border-b border-wb-border">
+      <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-wb-border border-b border-wb-border">
         {[
           { label: "Market",   value: marketOpen ? "Open" : "Closed", pos: marketOpen },
           { label: "Today",    value: `${status?.trades_today ?? 0} trades` },
@@ -146,7 +146,7 @@ export function AutoTradePanel() {
       {showSettings && (
         <div className="border-b border-wb-border bg-wb-surface2 p-3 space-y-3">
           <div className="text-[10px] uppercase text-wb-dim tracking-wider">Update Settings</div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {[
               { label: "Min Conf (%)", placeholder: String(Math.round((status?.min_confidence ?? 0.7) * 100)), state: confInput, set: setConfInput, props: { type: "number", min: 50, max: 100, step: 1 } },
               { label: "Max Price ($)", placeholder: String(status?.max_price ?? 5), state: maxPriceInput, set: setMaxPriceInput, props: { type: "number", min: 0.1, max: 10, step: 0.5 } },

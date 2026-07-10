@@ -70,7 +70,7 @@ export default function SettingsPage() {
                   </p>
                   <div className="flex gap-2">
                     <button onClick={() => { setMode("live"); setShowLiveConfirm(false); }}
-                      className="px-3 py-1.5 text-[12px] bg-wb-orange text-black font-bold">
+                      className="px-4 py-2.5 min-h-[44px] text-[12px] bg-wb-orange text-black font-bold">
                       I understand — enable live
                     </button>
                     <button onClick={() => setShowLiveConfirm(false)} className="btn-ghost text-[12px] py-1.5">Cancel</button>
@@ -91,7 +91,7 @@ export default function SettingsPage() {
           </div>
           <button onClick={toggleKillSwitch}
             className={cn(
-              "flex items-center gap-1.5 text-[12px] font-bold px-3 py-1.5 border transition",
+              "flex items-center gap-1.5 text-[12px] font-bold px-3 py-2.5 min-h-[40px] border transition",
               limits?.kill_switch_armed
                 ? "bg-wb-red-dim text-wb-red border-wb-red/25 hover:bg-wb-red/20"
                 : "bg-wb-surface3 text-wb-muted border-wb-border hover:text-wb-text"

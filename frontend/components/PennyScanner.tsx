@@ -58,21 +58,23 @@ export function PennyScanner() {
           </span>
         </div>
         <button onClick={() => mutate()} title="Refresh"
-          className="p-1 hover:bg-wb-surface3 transition-colors rounded-sm">
+          className="p-2.5 hover:bg-wb-surface3 transition-colors rounded-sm">
           <RefreshCw size={12} className={cn("text-wb-dim", isLoading && "animate-spin")} />
         </button>
       </div>
 
       {/* Column headers */}
       {rows.length > 0 && (
-        <div className="grid gap-0 border-b border-wb-border bg-wb-surface2"
-          style={{ gridTemplateColumns: "80px 68px 54px 1fr 1fr 56px" }}>
-          {["Symbol", "Price", "Chg%", "Vol Surge", "AI Score", "Signal"].map((h) => (
-            <div key={h} className={cn(
-              "px-2 py-1.5 text-[10px] uppercase text-wb-dim tracking-wider",
-              h === "Symbol" ? "text-left" : "text-right last:text-center"
-            )}>{h}</div>
-          ))}
+        <div className="overflow-x-auto">
+          <div className="min-w-[380px] grid gap-0 border-b border-wb-border bg-wb-surface2"
+            style={{ gridTemplateColumns: "80px 68px 54px 1fr 1fr 56px" }}>
+            {["Symbol", "Price", "Chg%", "Vol Surge", "AI Score", "Signal"].map((h) => (
+              <div key={h} className={cn(
+                "px-2 py-1.5 text-[10px] uppercase text-wb-dim tracking-wider",
+                h === "Symbol" ? "text-left" : "text-right last:text-center"
+              )}>{h}</div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -83,38 +85,40 @@ export function PennyScanner() {
         <div className="py-8 text-center text-[11px] text-wb-dim">No penny candidates meeting threshold right now.</div>
       )}
 
-      {rows.map((c: ScanCandidate) => {
-        const pos = c.change_pct >= 0;
-        const vs = verdictStyle[c.verdict] ?? verdictStyle.hold;
-        return (
-          <div key={c.symbol}
-            className="grid items-center border-b border-wb-border last:border-0 hover:bg-wb-surface2 transition-colors"
-            style={{ gridTemplateColumns: "80px 68px 54px 1fr 1fr 56px" }}>
-            <div className="px-2 py-2.5 flex items-center gap-1.5">
-              <span className="w-1 h-3 rounded-full bg-wb-orange shrink-0" />
-              <span className="font-semibold text-[12px] text-wb-text">{c.symbol}</span>
+      <div className="overflow-x-auto">
+        {rows.map((c: ScanCandidate) => {
+          const pos = c.change_pct >= 0;
+          const vs = verdictStyle[c.verdict] ?? verdictStyle.hold;
+          return (
+            <div key={c.symbol}
+              className="min-w-[380px] grid items-center border-b border-wb-border last:border-0 hover:bg-wb-surface2 transition-colors"
+              style={{ gridTemplateColumns: "80px 68px 54px 1fr 1fr 56px" }}>
+              <div className="px-2 py-2.5 flex items-center gap-1.5">
+                <span className="w-1 h-3 rounded-full bg-wb-orange shrink-0" />
+                <span className="font-semibold text-[12px] text-wb-text">{c.symbol}</span>
+              </div>
+              <div className="px-2 py-2.5 text-right num text-[12px] text-wb-text">
+                ${c.price.toFixed(4)}
+              </div>
+              <div className={cn("px-2 py-2.5 text-right num text-[12px] font-medium",
+                pos ? "pos-text" : "neg-text")}>
+                {pos ? "+" : ""}{c.change_pct.toFixed(2)}%
+              </div>
+              <div className="px-2 py-2.5">
+                <SurgeBar surge={c.volume_surge} />
+              </div>
+              <div className="px-2 py-2.5">
+                <ConfBar value={c.confidence} />
+              </div>
+              <div className="px-2 py-2.5 flex justify-center">
+                <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded-sm", vs.cls)}>
+                  {vs.label}
+                </span>
+              </div>
             </div>
-            <div className="px-2 py-2.5 text-right num text-[12px] text-wb-text">
-              ${c.price.toFixed(4)}
-            </div>
-            <div className={cn("px-2 py-2.5 text-right num text-[12px] font-medium",
-              pos ? "pos-text" : "neg-text")}>
-              {pos ? "+" : ""}{c.change_pct.toFixed(2)}%
-            </div>
-            <div className="px-2 py-2.5">
-              <SurgeBar surge={c.volume_surge} />
-            </div>
-            <div className="px-2 py-2.5">
-              <ConfBar value={c.confidence} />
-            </div>
-            <div className="px-2 py-2.5 flex justify-center">
-              <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded-sm", vs.cls)}>
-                {vs.label}
-              </span>
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
 
       <div className="px-4 py-2 border-t border-wb-border bg-wb-surface2">
         <span className="text-[10px] text-wb-dim">Sorted by volume surge · refreshes every 90s</span>
