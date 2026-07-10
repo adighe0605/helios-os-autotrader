@@ -22,7 +22,7 @@ const SUGGESTED_PROMPTS = [
 ];
 
 export default function OraclePage() {
-  const WELCOME = "Hello! I am **Oracle AI** — powered by the same AI agents that run your trading bot.\n\nI can answer questions using **real agent signals** (PennyMomentumAgent · MeanReversionAgent · SentimentAgent · RiskAgent · IntradayAgent):\n\n• *\"Analyze SNDL\"* — runs the full agent debate\n• *\"What stocks should I trade?\"* — live penny + blue chip scan\n• *\"Why are we holding TSLA?\"* — agent re-evaluation of open positions\n• *\"Intraday signal on NVDA?\"* — 5m VWAP/ORB check\n• *\"How much did I make today?\"* — live account data\n\nAsk me anything!";
+  const WELCOME = "Hello! I am **Oracle AI** — powered by the industry trading knowledge & AI agents that run your trading bot.\n\nI can answer questions using **real agent signals** (PennyMomentumAgent · MeanReversionAgent · SentimentAgent · RiskAgent · IntradayAgent):\n\n• *\"Analyze SNDL\"* — runs the full agent debate\n• *\"What stocks should I trade?\"* — live penny + blue chip scan\n• *\"Why are we holding TSLA?\"* — agent re-evaluation of open positions\n• *\"Intraday signal on NVDA?\"* — 5m VWAP/ORB check\n• *\"How much did I make today?\"* — live account data\n\nAsk me anything!";
 
   const [messages, setMessages] = useState<Message[]>([
     {
