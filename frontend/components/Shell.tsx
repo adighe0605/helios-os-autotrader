@@ -102,6 +102,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
           {/* Mode + value pill */}
           <div className="hidden sm:flex items-center gap-2 px-3 h-8 bg-wb-surface border border-wb-border rounded-lg">
             <Shield className="w-3.5 h-3.5 text-wb-orange" />
+            <span className="text-[11px] font-semibold text-wb-orange">Hello Akshay</span>
+            <span className="text-wb-border">|</span>
             <span className="text-[11px] font-semibold text-wb-muted">{modeLabel}</span>
             <span className="text-[13px] font-bold num text-wb-text">
               {portfolio ? fmt.usd(portfolio.portfolio_value) : "—"}
