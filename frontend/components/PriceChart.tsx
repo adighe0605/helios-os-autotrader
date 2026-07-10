@@ -10,7 +10,7 @@ type Tf = "1d" | "1w" | "1m" | "3m" | "1y";
 const TF_TO_LIMIT: Record<Tf, number> = { "1d": 78, "1w": 100, "1m": 30, "3m": 90, "1y": 252 };
 
 export function PriceChart({ symbol }: { symbol: string }) {
-  const [tf, setTf] = useState<Tf>("3m");
+  const [tf, setTf]     = useState<Tf>("3m");
   const [data, setData] = useState<{ t: string; c: number }[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -28,29 +28,32 @@ export function PriceChart({ symbol }: { symbol: string }) {
   const first = data[0]?.c ?? last;
   const pct   = first ? ((last / first) - 1) * 100 : 0;
   const pos   = pct >= 0;
-  const color = pos ? "#00C076" : "#F6465D";
+  const color = pos ? "#22C55E" : "#EF4444";
 
   return (
-    <div className="bg-wb-surface border border-wb-border overflow-hidden">
-      {/* Title row */}
-      <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 border-b border-wb-border bg-wb-surface2">
-        <div className="flex items-baseline gap-3 flex-1 min-w-0">
-          <span className="font-bold text-wb-text">{symbol}</span>
-          <span className="text-[15px] font-bold num text-wb-text">{fmt.usd(last)}</span>
-          <span className={cn("text-[12px] num font-semibold", pos ? "pos-text" : "neg-text")}>
+    <div className="bg-wb-surface border border-wb-border rounded-xl overflow-hidden shadow-card">
+      {/* Header */}
+      <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-wb-border">
+        <div className="flex items-baseline gap-2.5 flex-1 min-w-0">
+          <span className="text-[15px] font-bold text-wb-text">{symbol}</span>
+          {last > 0 && (
+            <span className="text-[16px] font-bold num text-wb-text">{fmt.usd(last)}</span>
+          )}
+          <span className={cn("badge num font-semibold", pos ? "badge-green" : "badge-red")}>
             {fmt.pct(pct)}
           </span>
-          {loading && <span className="text-[10px] text-wb-dim">…</span>}
+          {loading && <span className="text-[11px] text-wb-dim animate-pulse">Loading…</span>}
         </div>
-        {/* Timeframe buttons */}
-        <div className="flex gap-px bg-wb-surface3 border border-wb-border rounded-sm overflow-hidden shrink-0">
+
+        {/* Timeframe segmented control */}
+        <div className="flex gap-0.5 bg-wb-surface2 border border-wb-border rounded-lg p-0.5 shrink-0">
           {(["1d", "1w", "1m", "3m", "1y"] as Tf[]).map((k) => (
             <button key={k} onClick={() => setTf(k)}
               className={cn(
-                "px-2.5 py-2 min-h-[36px] text-[11px] font-medium transition",
+                "px-2.5 h-7 rounded-md text-[12px] font-medium transition-all duration-150 cursor-pointer min-w-[32px]",
                 tf === k
-                  ? "bg-wb-orange text-black"
-                  : "text-wb-muted hover:text-wb-text hover:bg-wb-surface3"
+                  ? "bg-wb-orange text-black shadow-sm"
+                  : "text-wb-muted hover:text-wb-text"
               )}>
               {k.toUpperCase()}
             </button>
@@ -59,33 +62,33 @@ export function PriceChart({ symbol }: { symbol: string }) {
       </div>
 
       {/* Chart */}
-      <div className="w-full h-[180px] sm:h-[260px]">
+      <div className="w-full h-[200px] sm:h-[280px]">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 8, left: 0, right: 0, bottom: 0 }}>
+          <AreaChart data={data} margin={{ top: 10, left: 0, right: 0, bottom: 0 }}>
             <defs>
-              <linearGradient id={`gPriceWb-${symbol}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor={color} stopOpacity={0.3} />
-                <stop offset="100%" stopColor={color} stopOpacity={0.02} />
+              <linearGradient id={`gPrice21-${symbol}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stopColor={color} stopOpacity={0.2} />
+                <stop offset="100%" stopColor={color} stopOpacity={0.01} />
               </linearGradient>
             </defs>
             <XAxis dataKey="t" hide />
             <YAxis hide domain={["auto", "auto"]} />
             <Tooltip
-              cursor={{ stroke: "rgba(255,255,255,0.08)", strokeWidth: 1, strokeDasharray: "3 3" }}
+              cursor={{ stroke: "rgba(255,255,255,0.08)", strokeWidth: 1, strokeDasharray: "4 4" }}
               contentStyle={{
-                background: "#1E2329",
-                border: "1px solid #2B2F36",
-                borderRadius: 2,
-                fontSize: 11,
-                padding: "6px 10px",
+                background: "#18181B",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: 10,
+                fontSize: 12,
+                padding: "8px 12px",
               }}
               labelFormatter={(v) => new Date(v as string).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
               formatter={(v: number) => [fmt.usd(v), symbol]}
             />
             <Area type="monotone" dataKey="c"
-              stroke={color} strokeWidth={1.5}
-              fill={`url(#gPriceWb-${symbol})`}
-              dot={false} activeDot={{ r: 3, fill: color }} />
+              stroke={color} strokeWidth={2}
+              fill={`url(#gPrice21-${symbol})`}
+              dot={false} activeDot={{ r: 4, fill: color, stroke: "rgba(0,0,0,0.4)", strokeWidth: 2 }} />
           </AreaChart>
         </ResponsiveContainer>
       </div>
