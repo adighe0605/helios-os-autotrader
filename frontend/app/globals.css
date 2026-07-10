@@ -126,6 +126,183 @@
   --wb-dim: 109 40 217;
 }
 
+/* Platform-inspired presets */
+.theme-webull-dark {
+  color-scheme: dark;
+  --wb-bg: 13 17 23;
+  --wb-surface: 20 26 34;
+  --wb-surface2: 30 37 48;
+  --wb-surface3: 43 52 67;
+  --wb-border: 255 255 255;
+  --wb-border2: 255 255 255;
+  --wb-orange: 240 164 0;
+  --wb-orange-glow: 245 184 0;
+  --wb-orange-dim: 45 38 0;
+  --wb-green: 0 192 118;
+  --wb-green-dim: 0 31 18;
+  --wb-red: 246 70 93;
+  --wb-red-dim: 37 10 13;
+  --wb-blue: 79 140 255;
+  --wb-blue-dim: 15 31 61;
+  --wb-text: 234 236 239;
+  --wb-muted: 132 142 156;
+  --wb-dim: 82 91 106;
+}
+
+.theme-webull-light {
+  color-scheme: light;
+  --wb-bg: 248 250 252;
+  --wb-surface: 255 255 255;
+  --wb-surface2: 241 245 249;
+  --wb-surface3: 226 232 240;
+  --wb-border: 15 23 42;
+  --wb-border2: 30 41 59;
+  --wb-orange: 217 119 6;
+  --wb-orange-glow: 245 158 11;
+  --wb-orange-dim: 255 237 213;
+  --wb-green: 5 150 105;
+  --wb-green-dim: 209 250 229;
+  --wb-red: 220 38 38;
+  --wb-red-dim: 254 226 226;
+  --wb-blue: 37 99 235;
+  --wb-blue-dim: 219 234 254;
+  --wb-text: 15 23 42;
+  --wb-muted: 51 65 85;
+  --wb-dim: 100 116 139;
+}
+
+.theme-tradingview-dark {
+  color-scheme: dark;
+  --wb-bg: 19 23 34;
+  --wb-surface: 24 28 40;
+  --wb-surface2: 32 37 52;
+  --wb-surface3: 45 52 71;
+  --wb-border: 255 255 255;
+  --wb-border2: 255 255 255;
+  --wb-orange: 59 130 246;
+  --wb-orange-glow: 96 165 250;
+  --wb-orange-dim: 19 35 68;
+  --wb-green: 0 177 106;
+  --wb-green-dim: 8 42 29;
+  --wb-red: 242 84 84;
+  --wb-red-dim: 56 18 24;
+  --wb-blue: 56 189 248;
+  --wb-blue-dim: 14 52 72;
+  --wb-text: 214 219 228;
+  --wb-muted: 143 153 168;
+  --wb-dim: 97 109 127;
+}
+
+.theme-tradingview-light {
+  color-scheme: light;
+  --wb-bg: 246 248 252;
+  --wb-surface: 255 255 255;
+  --wb-surface2: 240 244 250;
+  --wb-surface3: 226 232 240;
+  --wb-border: 30 64 175;
+  --wb-border2: 37 99 235;
+  --wb-orange: 37 99 235;
+  --wb-orange-glow: 59 130 246;
+  --wb-orange-dim: 219 234 254;
+  --wb-green: 22 163 74;
+  --wb-green-dim: 220 252 231;
+  --wb-red: 220 38 38;
+  --wb-red-dim: 254 226 226;
+  --wb-blue: 37 99 235;
+  --wb-blue-dim: 219 234 254;
+  --wb-text: 15 23 42;
+  --wb-muted: 51 65 85;
+  --wb-dim: 100 116 139;
+}
+
+.theme-bloomberg-dark {
+  color-scheme: dark;
+  --wb-bg: 5 5 5;
+  --wb-surface: 13 13 13;
+  --wb-surface2: 22 22 22;
+  --wb-surface3: 38 38 38;
+  --wb-border: 255 255 255;
+  --wb-border2: 255 255 255;
+  --wb-orange: 249 115 22;
+  --wb-orange-glow: 251 146 60;
+  --wb-orange-dim: 52 21 6;
+  --wb-green: 34 197 94;
+  --wb-green-dim: 22 47 32;
+  --wb-red: 248 113 113;
+  --wb-red-dim: 63 29 29;
+  --wb-blue: 96 165 250;
+  --wb-blue-dim: 30 41 59;
+  --wb-text: 244 244 245;
+  --wb-muted: 161 161 170;
+  --wb-dim: 113 113 122;
+}
+
+.theme-bloomberg-light {
+  color-scheme: light;
+  --wb-bg: 255 248 230;
+  --wb-surface: 255 255 255;
+  --wb-surface2: 255 243 214;
+  --wb-surface3: 254 230 178;
+  --wb-border: 124 45 18;
+  --wb-border2: 154 52 18;
+  --wb-orange: 194 65 12;
+  --wb-orange-glow: 234 88 12;
+  --wb-orange-dim: 255 237 213;
+  --wb-green: 21 128 61;
+  --wb-green-dim: 220 252 231;
+  --wb-red: 185 28 28;
+  --wb-red-dim: 254 226 226;
+  --wb-blue: 29 78 216;
+  --wb-blue-dim: 219 234 254;
+  --wb-text: 41 37 36;
+  --wb-muted: 68 64 60;
+  --wb-dim: 120 113 108;
+}
+
+.theme-robinhood-dark {
+  color-scheme: dark;
+  --wb-bg: 11 20 16;
+  --wb-surface: 17 30 24;
+  --wb-surface2: 25 42 34;
+  --wb-surface3: 37 58 47;
+  --wb-border: 255 255 255;
+  --wb-border2: 255 255 255;
+  --wb-orange: 34 197 94;
+  --wb-orange-glow: 74 222 128;
+  --wb-orange-dim: 14 43 29;
+  --wb-green: 34 197 94;
+  --wb-green-dim: 20 83 45;
+  --wb-red: 248 113 113;
+  --wb-red-dim: 69 10 10;
+  --wb-blue: 16 185 129;
+  --wb-blue-dim: 6 78 59;
+  --wb-text: 230 252 240;
+  --wb-muted: 134 239 172;
+  --wb-dim: 74 222 128;
+}
+
+.theme-robinhood-light {
+  color-scheme: light;
+  --wb-bg: 240 253 244;
+  --wb-surface: 255 255 255;
+  --wb-surface2: 220 252 231;
+  --wb-surface3: 187 247 208;
+  --wb-border: 22 163 74;
+  --wb-border2: 21 128 61;
+  --wb-orange: 22 163 74;
+  --wb-orange-glow: 34 197 94;
+  --wb-orange-dim: 220 252 231;
+  --wb-green: 22 163 74;
+  --wb-green-dim: 220 252 231;
+  --wb-red: 185 28 28;
+  --wb-red-dim: 254 226 226;
+  --wb-blue: 5 150 105;
+  --wb-blue-dim: 204 251 241;
+  --wb-text: 20 83 45;
+  --wb-muted: 22 101 52;
+  --wb-dim: 21 128 61;
+}
+
 html, body {
   background: rgb(var(--wb-bg));
   color: rgb(var(--wb-text));

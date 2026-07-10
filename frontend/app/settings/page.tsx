@@ -10,24 +10,28 @@ import { RiskGauge } from "@/components/RiskGauge";
 import type { RiskLimits } from "@/lib/types";
 
 type ThemeKey =
-  | "theme-amber-dark"
-  | "theme-amber-light"
-  | "theme-emerald-dark"
-  | "theme-emerald-light"
-  | "theme-violet-dark"
-  | "theme-violet-light";
+  | "theme-webull-dark"
+  | "theme-webull-light"
+  | "theme-tradingview-dark"
+  | "theme-tradingview-light"
+  | "theme-bloomberg-dark"
+  | "theme-bloomberg-light"
+  | "theme-robinhood-dark"
+  | "theme-robinhood-light";
 type ThemeMode = ThemeKey | "system";
 
 const THEME_STORAGE_KEY = "helios-theme";
-const DEFAULT_THEME: ThemeKey = "theme-amber-dark";
+const DEFAULT_THEME: ThemeKey = "theme-webull-dark";
 
 const THEMES: Array<{ key: ThemeKey; name: string; swatch: string }> = [
-  { key: "theme-amber-dark", name: "Amber Night", swatch: "linear-gradient(135deg,#0a0a0b,#f59e0b)" },
-  { key: "theme-amber-light", name: "Amber Day", swatch: "linear-gradient(135deg,#ffffff,#f59e0b)" },
-  { key: "theme-emerald-dark", name: "Emerald Night", swatch: "linear-gradient(135deg,#04110c,#10b981)" },
-  { key: "theme-emerald-light", name: "Emerald Day", swatch: "linear-gradient(135deg,#ffffff,#10b981)" },
-  { key: "theme-violet-dark", name: "Violet Night", swatch: "linear-gradient(135deg,#0b0a15,#8b5cf6)" },
-  { key: "theme-violet-light", name: "Violet Day", swatch: "linear-gradient(135deg,#ffffff,#8b5cf6)" },
+  { key: "theme-webull-dark", name: "WeBull Style — Dark", swatch: "linear-gradient(135deg,#0d1117,#f59e0b)" },
+  { key: "theme-webull-light", name: "WeBull Style — Light", swatch: "linear-gradient(135deg,#ffffff,#f59e0b)" },
+  { key: "theme-tradingview-dark", name: "TradingView Style — Dark", swatch: "linear-gradient(135deg,#131722,#3b82f6)" },
+  { key: "theme-tradingview-light", name: "TradingView Style — Light", swatch: "linear-gradient(135deg,#ffffff,#3b82f6)" },
+  { key: "theme-bloomberg-dark", name: "Bloomberg Style — Dark", swatch: "linear-gradient(135deg,#050505,#f97316)" },
+  { key: "theme-bloomberg-light", name: "Bloomberg Style — Light", swatch: "linear-gradient(135deg,#fff8e6,#f97316)" },
+  { key: "theme-robinhood-dark", name: "Robinhood Style — Dark", swatch: "linear-gradient(135deg,#0b1410,#22c55e)" },
+  { key: "theme-robinhood-light", name: "Robinhood Style — Light", swatch: "linear-gradient(135deg,#ffffff,#22c55e)" },
 ];
 
 export default function SettingsPage() {
@@ -75,8 +79,8 @@ export default function SettingsPage() {
 
   function resolveSystemTheme(): ThemeKey {
     return window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "theme-amber-dark"
-      : "theme-amber-light";
+      ? "theme-webull-dark"
+      : "theme-webull-light";
   }
 
   function isThemeKey(value: string | null): value is ThemeKey {
