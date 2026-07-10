@@ -1,0 +1,64 @@
+name: 🤖 Auto Trade Bot
+
+on:
+  schedule:
+    # Every 5 minutes, Mon–Fri, 9:30 AM – 4:00 PM ET (13:30–20:00 UTC)
+    - cron: "*/5 13-20 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (no real orders)"
+        required: false
+        default: "true"
+        type: boolean
+
+jobs:
+  trade:
+    name: Trade Cycle
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Run trade cycle
+        env:
+          TRADING_MODE: paper
+          ENVIRONMENT: production
+          ALPACA_BASE_URL: https://paper-api.alpaca.markets
+          ALPACA_DATA_URL: https://data.alpaca.markets
+          ALPACA_API_KEY_ID: ${{ secrets.ALPACA_API_KEY_ID }}
+          ALPACA_API_SECRET_KEY: ${{ secrets.ALPACA_API_SECRET_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: claude-opus-4-7
+          ANTHROPIC_FAST_MODEL: claude-haiku-4-5-20251001
+          AUTONOMOUS_MODE: ${{ secrets.AUTONOMOUS_MODE || 'false' }}
+          AUTO_MIN_CONFIDENCE: ${{ secrets.AUTO_MIN_CONFIDENCE || '0.70' }}
+          AUTO_MAX_POSITION_PCT: "3.0"
+          AUTO_MAX_CONCURRENT_POSITIONS: "5"
+          PENNY_MAX_PRICE: "5.00"
+          PENNY_MIN_PRICE: "0.10"
+          PENNY_MIN_VOLUME: "300000"
+          PENNY_MIN_VOLUME_SURGE: "1.5"
+          PENNY_MAX_SPREAD_PCT: "3.0"
+          RISK_MAX_DAILY_LOSS_PCT: "2.0"
+          RISK_MAX_POSITION_PCT: "10.0"
+          RISK_MAX_DRAWDOWN_PCT: "15.0"
+          RISK_MAX_TRADES_PER_DAY: "25"
+          RISK_COOLDOWN_AFTER_LOSS_MIN: "15"
+          SECRET_KEY: ${{ secrets.SECRET_KEY || 'dev-secret' }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET || 'dev-jwt' }}
+          DATABASE_URL: "sqlite:///./aitrader.db"
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: python scripts/trade_cycle.py

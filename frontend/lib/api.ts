@@ -4,7 +4,7 @@ import type {
 } from "./types";
 import { mockPortfolio, mockPositions, mockCandles, mockNews, mockQuote, mockDecision, mockOrders, mockBacktest } from "./mock";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 async function req<T>(path: string, init?: RequestInit, fallback?: T): Promise<T> {
   try {
