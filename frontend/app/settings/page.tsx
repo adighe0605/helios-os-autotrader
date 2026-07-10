@@ -2,12 +2,29 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { AlertTriangle, PlayCircle, Power, Save, Shield } from "lucide-react";
+import { AlertTriangle, Palette, PlayCircle, Power, Save, Shield } from "lucide-react";
 
 import { api } from "@/lib/api";
 import { cn } from "@/lib/format";
 import { RiskGauge } from "@/components/RiskGauge";
 import type { RiskLimits } from "@/lib/types";
+
+type ThemeKey =
+  | "theme-amber-dark"
+  | "theme-amber-light"
+  | "theme-emerald-dark"
+  | "theme-emerald-light"
+  | "theme-violet-dark"
+  | "theme-violet-light";
+
+const THEMES: Array<{ key: ThemeKey; name: string; swatch: string }> = [
+  { key: "theme-amber-dark", name: "Amber Night", swatch: "linear-gradient(135deg,#0a0a0b,#f59e0b)" },
+  { key: "theme-amber-light", name: "Amber Day", swatch: "linear-gradient(135deg,#ffffff,#f59e0b)" },
+  { key: "theme-emerald-dark", name: "Emerald Night", swatch: "linear-gradient(135deg,#04110c,#10b981)" },
+  { key: "theme-emerald-light", name: "Emerald Day", swatch: "linear-gradient(135deg,#ffffff,#10b981)" },
+  { key: "theme-violet-dark", name: "Violet Night", swatch: "linear-gradient(135deg,#0b0a15,#8b5cf6)" },
+  { key: "theme-violet-light", name: "Violet Day", swatch: "linear-gradient(135deg,#ffffff,#8b5cf6)" },
+];
 
 export default function SettingsPage() {
   const [limits, setLimits] = useState<RiskLimits | null>(null);
@@ -15,8 +32,22 @@ export default function SettingsPage() {
   const [showLiveConfirm, setShowLiveConfirm] = useState(false);
   const [aggressiveness, setAggressiveness] = useState(50);
   const [saving, setSaving] = useState(false);
+  const [theme, setTheme] = useState<ThemeKey>("theme-amber-dark");
 
   useEffect(() => { api.riskLimits().then(setLimits); }, []);
+  useEffect(() => {
+    const root = document.documentElement;
+    const current = THEMES.find((t) => root.classList.contains(t.key));
+    if (current) setTheme(current.key);
+  }, []);
+
+  function applyTheme(next: ThemeKey) {
+    const root = document.documentElement;
+    THEMES.forEach((t) => root.classList.remove(t.key));
+    root.classList.add(next);
+    localStorage.setItem("helios-theme", next);
+    setTheme(next);
+  }
 
   async function save() {
     if (!limits) return;
@@ -51,6 +82,42 @@ export default function SettingsPage() {
             <PlayCircle className="w-4 h-4" />
             Open Interactive Demo
           </Link>
+        </div>
+      </section>
+
+      {/* Theme selection */}
+      <section className="bg-wb-surface border border-wb-border rounded-xl overflow-hidden shadow-card">
+        <div className="px-4 py-3 border-b border-wb-border flex items-center gap-2">
+          <Palette className="w-4 h-4 text-wb-orange" />
+          <span className="text-[13px] font-semibold text-wb-text">Themes</span>
+        </div>
+        <div className="p-4">
+          <p className="text-[13px] text-wb-muted mb-3">
+            Pick a professional style — each theme has a clean light and dark variant.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {THEMES.map((t) => {
+              const active = theme === t.key;
+              return (
+                <button
+                  key={t.key}
+                  onClick={() => applyTheme(t.key)}
+                  className={cn(
+                    "text-left p-3 rounded-xl border transition-all duration-150 min-h-[44px]",
+                    active
+                      ? "border-wb-orange bg-wb-orange/10 shadow-card"
+                      : "border-wb-border bg-wb-surface2 hover:border-wb-border2 hover:bg-wb-surface3"
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="w-7 h-7 rounded-lg border border-wb-border/30" style={{ background: t.swatch }} />
+                    <span className="text-[13px] font-semibold text-wb-text">{t.name}</span>
+                  </div>
+                  <div className="text-[11px] text-wb-muted mt-1">{t.key.includes("light") ? "Light mode" : "Dark mode"}</div>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </section>
 

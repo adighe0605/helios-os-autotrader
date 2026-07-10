@@ -4,11 +4,131 @@
 
 :root {
   color-scheme: dark;
+  --wb-bg: 9 9 11;
+  --wb-surface: 17 17 19;
+  --wb-surface2: 24 24 27;
+  --wb-surface3: 39 39 42;
+  --wb-border: 255 255 255;
+  --wb-border2: 255 255 255;
+  --wb-orange: 245 158 11;
+  --wb-orange-glow: 251 191 36;
+  --wb-orange-dim: 28 20 0;
+  --wb-green: 34 197 94;
+  --wb-green-dim: 5 46 22;
+  --wb-red: 239 68 68;
+  --wb-red-dim: 31 7 7;
+  --wb-blue: 59 130 246;
+  --wb-blue-dim: 12 26 59;
+  --wb-text: 250 250 250;
+  --wb-muted: 161 161 170;
+  --wb-dim: 82 82 91;
+}
+
+.theme-amber-dark {
+  color-scheme: dark;
+}
+
+.theme-amber-light {
+  color-scheme: light;
+  --wb-bg: 249 250 251;
+  --wb-surface: 255 255 255;
+  --wb-surface2: 243 244 246;
+  --wb-surface3: 229 231 235;
+  --wb-border: 17 24 39;
+  --wb-border2: 17 24 39;
+  --wb-orange: 217 119 6;
+  --wb-orange-glow: 245 158 11;
+  --wb-orange-dim: 254 243 199;
+  --wb-green: 21 128 61;
+  --wb-green-dim: 220 252 231;
+  --wb-red: 220 38 38;
+  --wb-red-dim: 254 226 226;
+  --wb-blue: 29 78 216;
+  --wb-blue-dim: 219 234 254;
+  --wb-text: 15 23 42;
+  --wb-muted: 71 85 105;
+  --wb-dim: 100 116 139;
+}
+
+.theme-emerald-dark {
+  color-scheme: dark;
+  --wb-bg: 4 13 10;
+  --wb-surface: 10 27 20;
+  --wb-surface2: 14 38 28;
+  --wb-surface3: 23 56 42;
+  --wb-border: 110 231 183;
+  --wb-border2: 167 243 208;
+  --wb-orange: 16 185 129;
+  --wb-orange-glow: 52 211 153;
+  --wb-orange-dim: 3 31 23;
+}
+
+.theme-emerald-light {
+  color-scheme: light;
+  --wb-bg: 236 253 245;
+  --wb-surface: 255 255 255;
+  --wb-surface2: 236 253 245;
+  --wb-surface3: 209 250 229;
+  --wb-border: 5 150 105;
+  --wb-border2: 4 120 87;
+  --wb-orange: 5 150 105;
+  --wb-orange-glow: 16 185 129;
+  --wb-orange-dim: 209 250 229;
+  --wb-green: 5 150 105;
+  --wb-green-dim: 220 252 231;
+  --wb-red: 185 28 28;
+  --wb-red-dim: 254 226 226;
+  --wb-blue: 6 95 70;
+  --wb-blue-dim: 204 251 241;
+  --wb-text: 6 78 59;
+  --wb-muted: 6 95 70;
+  --wb-dim: 15 118 110;
+}
+
+.theme-violet-dark {
+  color-scheme: dark;
+  --wb-bg: 10 10 20;
+  --wb-surface: 20 18 38;
+  --wb-surface2: 33 26 63;
+  --wb-surface3: 52 40 94;
+  --wb-border: 196 181 253;
+  --wb-border2: 221 214 254;
+  --wb-orange: 139 92 246;
+  --wb-orange-glow: 167 139 250;
+  --wb-orange-dim: 36 24 71;
+  --wb-green: 74 222 128;
+  --wb-green-dim: 20 40 28;
+  --wb-red: 251 113 133;
+  --wb-red-dim: 63 22 33;
+  --wb-blue: 129 140 248;
+  --wb-blue-dim: 30 41 79;
+}
+
+.theme-violet-light {
+  color-scheme: light;
+  --wb-bg: 245 243 255;
+  --wb-surface: 255 255 255;
+  --wb-surface2: 245 243 255;
+  --wb-surface3: 237 233 254;
+  --wb-border: 109 40 217;
+  --wb-border2: 91 33 182;
+  --wb-orange: 124 58 237;
+  --wb-orange-glow: 139 92 246;
+  --wb-orange-dim: 237 233 254;
+  --wb-green: 22 163 74;
+  --wb-green-dim: 220 252 231;
+  --wb-red: 220 38 38;
+  --wb-red-dim: 254 226 226;
+  --wb-blue: 99 102 241;
+  --wb-blue-dim: 224 231 255;
+  --wb-text: 46 16 101;
+  --wb-muted: 91 33 182;
+  --wb-dim: 109 40 217;
 }
 
 html, body {
-  background: #09090B;
-  color: #FAFAFA;
+  background: rgb(var(--wb-bg));
+  color: rgb(var(--wb-text));
   min-height: 100%;
   -webkit-text-size-adjust: 100%;
 }
@@ -35,9 +155,9 @@ main { overscroll-behavior-y: contain; }
   .glass-strong { @apply card-elevated; }
 
   /* Card with colored top accent bar */
-  .card-accent-orange { @apply card; border-top: 2px solid #F59E0B; }
-  .card-accent-green  { @apply card; border-top: 2px solid #22C55E; }
-  .card-accent-red    { @apply card; border-top: 2px solid #EF4444; }
+  .card-accent-orange { @apply card; border-top: 2px solid rgb(var(--wb-orange)); }
+  .card-accent-green  { @apply card; border-top: 2px solid rgb(var(--wb-green)); }
+  .card-accent-red    { @apply card; border-top: 2px solid rgb(var(--wb-red)); }
 
   /* ── Typography ─────────────────────────────────────────────── */
   .num {
@@ -58,12 +178,12 @@ main { overscroll-behavior-y: contain; }
   .wb-section-label { @apply section-label; }
 
   /* ── Status colors ──────────────────────────────────────────── */
-  .pos-text  { color: #22C55E; }
-  .neg-text  { color: #EF4444; }
-  .warn-text { color: #F59E0B; }
-  .pos-bg    { background-color: #052E16; }
-  .neg-bg    { background-color: #1F0707; }
-  .orange-bg { background-color: #1C1400; }
+  .pos-text  { color: rgb(var(--wb-green)); }
+  .neg-text  { color: rgb(var(--wb-red)); }
+  .warn-text { color: rgb(var(--wb-orange)); }
+  .pos-bg    { background-color: rgb(var(--wb-green-dim)); }
+  .neg-bg    { background-color: rgb(var(--wb-red-dim)); }
+  .orange-bg { background-color: rgb(var(--wb-orange-dim)); }
 
   /* ── Pill badges ─────────────────────────────────────────────── */
   .badge {
@@ -121,19 +241,19 @@ main { overscroll-behavior-y: contain; }
   /* ── Dividers ────────────────────────────────────────────────── */
   .glow-divider {
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(245,158,11,0.25), transparent);
+    background: linear-gradient(90deg, transparent, rgb(var(--wb-orange) / 0.25), transparent);
   }
   .divider {
     height: 1px;
-    background: rgba(255,255,255,0.06);
+    background: rgb(var(--wb-border) / 0.2);
   }
 }
 
 /* ── Thin, subtle scrollbar ─────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.16); }
+::-webkit-scrollbar-thumb { background: rgb(var(--wb-border) / 0.3); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgb(var(--wb-border) / 0.45); }
 
 /* ── Ticker bar ──────────────────────────────────────────────────── */
 .ticker-track {
@@ -145,7 +265,7 @@ main { overscroll-behavior-y: contain; }
 
 /* ── Focus ring for keyboard nav ────────────────────────────────── */
 :focus-visible {
-  outline: 2px solid rgba(245,158,11,0.5);
+  outline: 2px solid rgb(var(--wb-orange) / 0.5);
   outline-offset: 2px;
 }
 
@@ -156,4 +276,3 @@ main { overscroll-behavior-y: contain; }
     transition-duration: 0.01ms !important;
   }
 }
-

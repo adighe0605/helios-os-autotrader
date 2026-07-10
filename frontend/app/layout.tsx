@@ -30,7 +30,14 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`dark ${inter.variable} ${firaCode.variable}`}>
+    <html lang="en" className={`theme-amber-dark ${inter.variable} ${firaCode.variable}`}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var key='helios-theme';var saved=localStorage.getItem(key);if(saved){document.documentElement.classList.remove('theme-amber-dark','theme-amber-light','theme-emerald-dark','theme-emerald-light','theme-violet-dark','theme-violet-light');document.documentElement.classList.add(saved);}}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className="min-h-screen text-wb-text antialiased bg-wb-bg">
         <Shell>{children}</Shell>
       </body>

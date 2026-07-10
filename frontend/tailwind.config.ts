@@ -15,41 +15,39 @@ const config: Config = {
       },
       colors: {
         wb: {
-          // OLED-first backgrounds — near-black with very subtle blue tint (21st.dev)
-          bg:       "#09090B",
-          surface:  "#111113",
-          surface2: "#18181B",
-          surface3: "#27272A",
-          // Borders — very subtle, layered
-          border:   "rgba(255,255,255,0.07)",
-          border2:  "rgba(255,255,255,0.12)",
-          // Brand accent — warm amber
-          orange:      "#F59E0B",
-          "orange-dim": "#1C1400",
-          // Status
-          green:       "#22C55E",
-          "green-dim": "#052E16",
-          red:         "#EF4444",
-          "red-dim":   "#1F0707",
-          blue:        "#3B82F6",
-          "blue-dim":  "#0C1A3B",
-          // Typography scale
-          text:  "#FAFAFA",
-          muted: "#A1A1AA",
-          dim:   "#52525B",
+          bg: "rgb(var(--wb-bg) / <alpha-value>)",
+          surface: "rgb(var(--wb-surface) / <alpha-value>)",
+          surface2: "rgb(var(--wb-surface2) / <alpha-value>)",
+          surface3: "rgb(var(--wb-surface3) / <alpha-value>)",
+          border: "rgb(var(--wb-border) / <alpha-value>)",
+          border2: "rgb(var(--wb-border2) / <alpha-value>)",
+          orange: "rgb(var(--wb-orange) / <alpha-value>)",
+          "orange-dim": "rgb(var(--wb-orange-dim) / <alpha-value>)",
+          green: "rgb(var(--wb-green) / <alpha-value>)",
+          "green-dim": "rgb(var(--wb-green-dim) / <alpha-value>)",
+          red: "rgb(var(--wb-red) / <alpha-value>)",
+          "red-dim": "rgb(var(--wb-red-dim) / <alpha-value>)",
+          blue: "rgb(var(--wb-blue) / <alpha-value>)",
+          "blue-dim": "rgb(var(--wb-blue-dim) / <alpha-value>)",
+          text: "rgb(var(--wb-text) / <alpha-value>)",
+          muted: "rgb(var(--wb-muted) / <alpha-value>)",
+          dim: "rgb(var(--wb-dim) / <alpha-value>)",
         },
         // Legacy aliases for backward compat
         ink: {
-          950: "#09090B",
-          900: "#111113",
-          800: "#18181B",
-          700: "#27272A",
-          600: "rgba(255,255,255,0.07)",
+          950: "rgb(var(--wb-bg) / <alpha-value>)",
+          900: "rgb(var(--wb-surface) / <alpha-value>)",
+          800: "rgb(var(--wb-surface2) / <alpha-value>)",
+          700: "rgb(var(--wb-surface3) / <alpha-value>)",
+          600: "rgb(var(--wb-border) / <alpha-value>)",
         },
-        accent: { DEFAULT: "#F59E0B", glow: "#FBB924" },
-        pos:  "#22C55E",
-        neg:  "#EF4444",
-        warn: "#F59E0B",
+        accent: {
+          DEFAULT: "rgb(var(--wb-orange) / <alpha-value>)",
+          glow: "rgb(var(--wb-orange-glow) / <alpha-value>)",
+        },
+        pos: "rgb(var(--wb-green) / <alpha-value>)",
+        neg: "rgb(var(--wb-red) / <alpha-value>)",
+        warn: "rgb(var(--wb-orange) / <alpha-value>)",
       },
       boxShadow: {
         card:        "0 1px 2px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05)",
@@ -114,4 +112,3 @@ const config: Config = {
 };
 
 export default config;
-
