@@ -48,8 +48,10 @@ export async function dataFetch<T = unknown>(path: string, init?: RequestInit): 
 
 /** Get snapshot(s) for one or many symbols — includes latestTrade, dailyBar, prevDailyBar */
 export async function getSnapshots(symbols: string[]): Promise<Record<string, AlpacaSnapshot>> {
-  const qs = symbols.map(s => `symbols=${encodeURIComponent(s)}`).join("&");
-  return dataFetch<Record<string, AlpacaSnapshot>>(`/v2/stocks/snapshots?${qs}&feed=iex`);
+  const joined = symbols.map((s) => s.toUpperCase()).join(",");
+  return dataFetch<Record<string, AlpacaSnapshot>>(
+    `/v2/stocks/snapshots?symbols=${encodeURIComponent(joined)}&feed=iex`
+  );
 }
 
 // ─── Alpaca response shapes ───────────────────────────────────────────────────
