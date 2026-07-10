@@ -114,7 +114,7 @@ export default function OraclePage() {
                     "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border",
                     isBot
                       ? "bg-wb-orange/10 border-wb-orange/20 text-wb-orange"
-                      : "bg-wb-surface3 border-wb-border text-wb-text"
+                      : "bg-slate-200 border-slate-300 text-slate-600"
                   )}
                 >
                   {isBot ? <Bot className="w-4.5 h-4.5" /> : <User className="w-4.5 h-4.5" />}
@@ -124,7 +124,7 @@ export default function OraclePage() {
                     "rounded-xl px-4 py-3 text-[13px] leading-relaxed shadow-sm border",
                     isBot
                       ? "bg-wb-surface2/50 border-wb-border/40 text-wb-text"
-                      : "bg-wb-orange text-black font-medium border-wb-orange"
+                      : "bg-slate-100 text-slate-900 font-medium border-slate-200"
                   )}
                 >
                   {/* Handle newlines and markdown-like bold text */}
