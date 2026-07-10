@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { AlertTriangle, Palette, PlayCircle, Power, Save, Shield } from "lucide-react";
+import { AlertTriangle, Monitor, Palette, PlayCircle, Power, RotateCcw, Save, Shield } from "lucide-react";
 
 import { api } from "@/lib/api";
 import { cn } from "@/lib/format";
@@ -16,6 +16,10 @@ type ThemeKey =
   | "theme-emerald-light"
   | "theme-violet-dark"
   | "theme-violet-light";
+type ThemeMode = ThemeKey | "system";
+
+const THEME_STORAGE_KEY = "helios-theme";
+const DEFAULT_THEME: ThemeKey = "theme-amber-dark";
 
 const THEMES: Array<{ key: ThemeKey; name: string; swatch: string }> = [
   { key: "theme-amber-dark", name: "Amber Night", swatch: "linear-gradient(135deg,#0a0a0b,#f59e0b)" },
@@ -32,21 +36,69 @@ export default function SettingsPage() {
   const [showLiveConfirm, setShowLiveConfirm] = useState(false);
   const [aggressiveness, setAggressiveness] = useState(50);
   const [saving, setSaving] = useState(false);
-  const [theme, setTheme] = useState<ThemeKey>("theme-amber-dark");
+  const [theme, setTheme] = useState<ThemeMode>(DEFAULT_THEME);
 
   useEffect(() => { api.riskLimits().then(setLimits); }, []);
   useEffect(() => {
-    const root = document.documentElement;
-    const current = THEMES.find((t) => root.classList.contains(t.key));
-    if (current) setTheme(current.key);
+    const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    if (saved === "system") {
+      setTheme("system");
+      applyResolvedTheme(resolveSystemTheme());
+      return;
+    }
+    if (isThemeKey(saved)) {
+      setTheme(saved);
+      applyResolvedTheme(saved);
+      return;
+    }
+    setTheme(DEFAULT_THEME);
+    applyResolvedTheme(DEFAULT_THEME);
   }, []);
 
-  function applyTheme(next: ThemeKey) {
+  useEffect(() => {
+    if (theme !== "system") return;
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = () => applyResolvedTheme(resolveSystemTheme());
+    if (mq.addEventListener) mq.addEventListener("change", handler);
+    else mq.addListener(handler);
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener("change", handler);
+      else mq.removeListener(handler);
+    };
+  }, [theme]);
+
+  function applyResolvedTheme(next: ThemeKey) {
     const root = document.documentElement;
     THEMES.forEach((t) => root.classList.remove(t.key));
     root.classList.add(next);
-    localStorage.setItem("helios-theme", next);
+  }
+
+  function resolveSystemTheme(): ThemeKey {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "theme-amber-dark"
+      : "theme-amber-light";
+  }
+
+  function isThemeKey(value: string | null): value is ThemeKey {
+    return !!value && THEMES.some((t) => t.key === value);
+  }
+
+  function applyTheme(next: ThemeMode) {
+    if (next === "system") {
+      localStorage.setItem(THEME_STORAGE_KEY, "system");
+      setTheme("system");
+      applyResolvedTheme(resolveSystemTheme());
+      return;
+    }
+    localStorage.setItem(THEME_STORAGE_KEY, next);
     setTheme(next);
+    applyResolvedTheme(next);
+  }
+
+  function resetTheme() {
+    localStorage.removeItem(THEME_STORAGE_KEY);
+    setTheme(DEFAULT_THEME);
+    applyResolvedTheme(DEFAULT_THEME);
   }
 
   async function save() {
@@ -95,6 +147,24 @@ export default function SettingsPage() {
           <p className="text-[13px] text-wb-muted mb-3">
             Pick a professional style — each theme has a clean light and dark variant.
           </p>
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <button
+              onClick={() => applyTheme("system")}
+              className={cn(
+                "flex items-center gap-2 px-3 h-9 rounded-lg border text-[12px] font-semibold transition-all",
+                theme === "system"
+                  ? "border-wb-orange bg-wb-orange/10 text-wb-orange"
+                  : "border-wb-border bg-wb-surface2 text-wb-muted hover:text-wb-text hover:border-wb-border2"
+              )}
+            >
+              <Monitor className="w-4 h-4" />
+              System Theme (Auto)
+            </button>
+            <button onClick={resetTheme} className="btn btn-ghost btn-sm">
+              <RotateCcw className="w-3.5 h-3.5" />
+              Reset Default
+            </button>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {THEMES.map((t) => {
               const active = theme === t.key;

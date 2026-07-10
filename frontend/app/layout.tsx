@@ -34,7 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var key='helios-theme';var saved=localStorage.getItem(key);if(saved){document.documentElement.classList.remove('theme-amber-dark','theme-amber-light','theme-emerald-dark','theme-emerald-light','theme-violet-dark','theme-violet-light');document.documentElement.classList.add(saved);}}catch(e){}})();`,
+            __html: `(function(){try{var key='helios-theme';var saved=localStorage.getItem(key);var all=['theme-amber-dark','theme-amber-light','theme-emerald-dark','theme-emerald-light','theme-violet-dark','theme-violet-light'];var root=document.documentElement;for(var i=0;i<all.length;i++){root.classList.remove(all[i]);}if(saved==='system'){var dark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;root.classList.add(dark?'theme-amber-dark':'theme-amber-light');}else if(saved&&all.indexOf(saved)>=0){root.classList.add(saved);}else{root.classList.add('theme-amber-dark');}}catch(e){}})();`,
           }}
         />
       </head>
