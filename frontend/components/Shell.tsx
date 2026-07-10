@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import useSWR from "swr";
 import {
-  BarChart3, Bot, History, Settings, Shield, TrendingUp, Zap,
+  BarChart3, Bot, History, Settings, Shield, TrendingUp, Zap, MessageSquare,
 } from "lucide-react";
 import { cn, fmt } from "@/lib/format";
 import { api } from "@/lib/api";
@@ -14,6 +14,7 @@ const nav = [
   { href: "/trade",     label: "Trade",       icon: TrendingUp },
   { href: "/agents",    label: "AI Agents",   icon: Bot        },
   { href: "/backtest",  label: "Backtest",    icon: History    },
+  { href: "/oracle",    label: "Oracle AI",   icon: MessageSquare },
   { href: "/settings",  label: "Settings",    icon: Settings   },
 ];
 
@@ -22,7 +23,7 @@ const TICKERS = [
   { s: "NVDA", p: "137.82", c: "+2.87%" },
   { s: "TSLA", p: "248.10", c: "-0.53%" },
   { s: "AMD",  p: "162.34", c: "+1.92%" },
-  { s: "META", p: "517.20", c: "+0.74%" },
+  { s: "META", p: "517.20", c: "+0.70%" },
   { s: "AMZN", p: "190.55", c: "+0.31%" },
   { s: "MSFT", p: "441.00", c: "+0.88%" },
   { s: "SNDL", p: "1.24",   c: "+8.45%" },
@@ -57,7 +58,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
     : "bg-wb-dim";
 
   return (
-    <div className="min-h-screen flex flex-col bg-wb-bg">
+    <div className="min-h-screen h-dvh flex flex-col bg-wb-bg">
 
       {/* ── Ticker bar ──────────────────────────────────────────── */}
       <div className="h-7 bg-wb-surface/80 border-b border-wb-border overflow-hidden flex items-center backdrop-blur-sm">
@@ -101,7 +102,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* ── Body ────────────────────────────────────────────────── */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0">
 
         {/* Sidebar */}
         <aside className="hidden md:flex w-56 shrink-0 flex-col bg-wb-bg border-r border-wb-border pt-2 pb-4">
@@ -145,7 +146,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </aside>
 
         {/* Main */}
-        <main className="flex-1 overflow-auto px-3 sm:px-5 py-4 pb-20 md:pb-6 animate-fadeIn">
+        <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-3 sm:px-5 py-4 pb-20 md:pb-6 animate-fadeIn">
           {children}
         </main>
       </div>
@@ -181,4 +182,3 @@ export function Shell({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
-

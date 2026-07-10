@@ -30,11 +30,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`theme-webull-dark ${inter.variable} ${firaCode.variable}`}>
+    <html lang="en" className={`theme-lifeos-default ${inter.variable} ${firaCode.variable}`}>
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var key='helios-theme';var saved=localStorage.getItem(key);var all=['theme-webull-dark','theme-webull-light','theme-tradingview-dark','theme-tradingview-light','theme-bloomberg-dark','theme-bloomberg-light','theme-robinhood-dark','theme-robinhood-light'];var root=document.documentElement;for(var i=0;i<all.length;i++){root.classList.remove(all[i]);}if(saved==='system'){var dark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;root.classList.add(dark?'theme-webull-dark':'theme-webull-light');}else if(saved&&all.indexOf(saved)>=0){root.classList.add(saved);}else{root.classList.add('theme-webull-dark');}}catch(e){}})();`,
+            __html: `(function(){try{var key='helios-theme';var saved=localStorage.getItem(key);var all=['theme-lifeos-default','theme-lifeos-paper','theme-lifeos-brutalist','theme-lifeos-synthwave','theme-lifeos-terminal','theme-lifeos-glass','theme-lifeos-kawaii','theme-lifeos-comic','theme-lifeos-midnight','theme-lifeos-frutiger','theme-lifeos-forest','theme-lifeos-newspaper','theme-lifeos-royal','theme-lifeos-sunset','theme-lifeos-cyberpunk'];var root=document.documentElement;for(var i=0;i<all.length;i++){root.classList.remove(all[i]);}if(saved&&all.indexOf(saved)>=0){root.classList.add(saved);}else{root.classList.add('theme-lifeos-default');}}catch(e){}})();`,
           }}
         />
       </head>

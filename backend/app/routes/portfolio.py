@@ -19,6 +19,12 @@ def portfolio() -> PortfolioSummary:
     )
 
 
+@router.get("/portfolio/history")
+def portfolio_history() -> dict:
+    b = get_broker()
+    return b.history()
+
+
 @router.get("/positions", response_model=list[PositionOut])
 def positions() -> list[PositionOut]:
     b = get_broker()

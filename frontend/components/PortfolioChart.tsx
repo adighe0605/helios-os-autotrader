@@ -18,7 +18,7 @@ export function PortfolioChart({ data, height = 200 }: { data: Point[]; height?:
       <div className="flex items-center justify-between px-4 py-3 border-b border-wb-border">
         <div className="flex items-center gap-3">
           <span className="text-[13px] font-semibold text-wb-text">Portfolio Value</span>
-          <span className="badge badge-muted">90-day</span>
+          <span className="badge badge-muted">{data.length ? `${data.length}-day` : "History"}</span>
         </div>
         <div className="flex items-baseline gap-2">
           <span className="text-[16px] font-bold num text-wb-text">{fmt.usd(last)}</span>

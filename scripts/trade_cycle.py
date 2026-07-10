@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 # Add backend to Python path so `from app.xxx import ...` works
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "backend"))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "backend"))
 
 from loguru import logger
 
@@ -68,9 +68,9 @@ def _run_scan_only() -> None:
             logger.info(f"Scan found {len(candidates)} candidate(s):")
             for c in candidates[:10]:
                 logger.info(
-                    f"  {c.symbol:6s} ${c.price:.3f}  "
-                    f"vol_surge={c.vol_surge:.1f}x  "
-                    f"score={c.score:.2f}"
+                    f"  {c['symbol']:6s} ${c['price']:.3f}  "
+                    f"vol_surge={c['volume_surge']:.1f}x  "
+                    f"change={c['change_pct']:.2f}%"
                 )
         else:
             logger.info("No penny candidates found this cycle.")

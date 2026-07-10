@@ -6,7 +6,7 @@ from loguru import logger
 
 from app.config import settings
 from app.db import Base, engine
-from app.routes import agents, auth, backtest, market, orders, portfolio, risk, ws
+from app.routes import agents, auth, backtest, market, orders, portfolio, risk, ws, oracle
 from app.routes.auto_trade import router as auto_trade_router
 from app.workers.celery_app import scheduler, setup_scheduler
 
@@ -78,4 +78,5 @@ app.include_router(agents.router)
 app.include_router(backtest.router)
 app.include_router(risk.router)
 app.include_router(ws.router)
+app.include_router(oracle.router)
 app.include_router(auto_trade_router)

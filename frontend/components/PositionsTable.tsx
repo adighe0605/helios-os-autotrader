@@ -28,8 +28,58 @@ export function PositionsTable({ positions }: { positions: Position[] }) {
         </span>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full">
+      {positions.length > 0 && (
+        <div className="md:hidden divide-y divide-wb-border">
+          {positions.map((p) => {
+            const gain = p.unrealized_pnl >= 0;
+            return (
+              <div key={p.symbol} className="px-4 py-3 space-y-2.5">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <SymbolAvatar symbol={p.symbol} pos={gain} />
+                    <div>
+                      <div className="text-[13px] font-semibold text-wb-text">{p.symbol}</div>
+                      <div className={cn("text-[11px] font-medium", gain ? "pos-text" : "neg-text")}>
+                        {gain ? "▲" : "▼"} {Math.abs(p.unrealized_pnl_pct).toFixed(2)}%
+                      </div>
+                    </div>
+                  </div>
+                  <span className={cn("badge num", gain ? "badge-green" : "badge-red")}>
+                    {gain ? "+" : ""}{p.unrealized_pnl_pct.toFixed(2)}%
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[12px]">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-wb-dim">Qty</span>
+                    <span className="num text-wb-text">{fmt.num(p.qty, 0)}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-wb-dim">Last</span>
+                    <span className="num text-wb-text">{fmt.usd(p.current_price)}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-wb-dim">Avg Cost</span>
+                    <span className="num text-wb-muted">{fmt.usd(p.avg_entry_price)}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-wb-dim">Mkt Value</span>
+                    <span className="num text-wb-text">{fmt.usd(p.market_value)}</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between text-[12px]">
+                  <span className="text-wb-dim">P&L</span>
+                  <span className={cn("num font-semibold", gain ? "pos-text" : "neg-text")}>
+                    {fmt.usd(p.unrealized_pnl)}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="hidden md:block overflow-x-auto">
+        <table className="w-full min-w-[760px]">
           <thead>
             <tr className="border-b border-wb-border">
               {["Symbol", "Qty", "Avg Cost", "Last", "Mkt Value", "P&L", "P&L%"].map((h) => (
@@ -71,18 +121,15 @@ export function PositionsTable({ positions }: { positions: Position[] }) {
                 </tr>
               );
             })}
-            {positions.length === 0 && (
-              <tr>
-                <td colSpan={7} className="py-12 text-center">
-                  <div className="text-wb-dim text-[13px]">No open positions</div>
-                  <div className="text-wb-dim/60 text-[12px] mt-1">Trades will appear here once executed</div>
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
       </div>
+      {positions.length === 0 && (
+        <div className="py-12 text-center">
+          <div className="text-wb-dim text-[13px]">No open positions</div>
+          <div className="text-wb-dim/60 text-[12px] mt-1">Trades will appear here once executed</div>
+        </div>
+      )}
     </div>
   );
 }
-

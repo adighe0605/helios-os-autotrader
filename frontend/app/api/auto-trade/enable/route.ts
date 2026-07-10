@@ -1,12 +1,21 @@
 import { NextResponse } from "next/server";
+import { setAutoTradeEnabled } from "@/lib/auto-trade-runtime";
 
-// Note: actual enable/disable persists via GitHub Actions secret AUTONOMOUS_MODE.
-// This endpoint provides immediate UI feedback. Set AUTONOMOUS_MODE=true in
-// Vercel env vars + GitHub Actions secrets to fully activate trading.
+const AUTO_TRADE_COOKIE = "helios_auto_trade_enabled";
+
 export async function POST() {
-  return NextResponse.json({
+  const state = setAutoTradeEnabled(true);
+  const res = NextResponse.json({
     ok: true,
-    enabled: true,
-    message: "Bot enabled. To persist across deploys, set AUTONOMOUS_MODE=true in Vercel environment variables.",
+    enabled: state.enabled,
+    message: "Bot started. It will execute when market is open.",
   });
+  res.cookies.set(AUTO_TRADE_COOKIE, "1", {
+    httpOnly: false,
+    sameSite: "lax",
+    secure: true,
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+  });
+  return res;
 }

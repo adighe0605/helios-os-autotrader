@@ -7,11 +7,13 @@ import { api } from "@/lib/api";
 import { fmt } from "@/lib/format";
 import { OrderTicket } from "@/components/OrderTicket";
 import { PriceChart } from "@/components/PriceChart";
+import { TradeHistoryPanel } from "@/components/TradeHistoryPanel";
 import { Watchlist } from "@/components/Watchlist";
 import { cn } from "@/lib/format";
 
 export default function TradePage() {
   const [symbol, setSymbol] = useState("SNDL");
+  const [historyDays, setHistoryDays] = useState(365);
   const { data: quote } = useSWR(`quote:${symbol}`, () => api.quote(symbol), { refreshInterval: 10_000 });
 
   return (
@@ -59,10 +61,10 @@ export default function TradePage() {
 
         <div className="space-y-4">
           <OrderTicket symbol={symbol} defaultPrice={quote?.price ?? 0} />
+          <TradeHistoryPanel days={historyDays} onDaysChange={setHistoryDays} />
           <Watchlist />
         </div>
       </div>
     </div>
   );
 }
-

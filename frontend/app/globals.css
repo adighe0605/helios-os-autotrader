@@ -303,6 +303,337 @@
   --wb-dim: 21 128 61;
 }
 
+/* LifeOS skin presets */
+.theme-lifeos-default {
+  color-scheme: light;
+  --wb-bg: 245 247 250;
+  --wb-surface: 255 255 255;
+  --wb-surface2: 237 241 247;
+  --wb-surface3: 225 231 242;
+  --wb-border: 194 202 220;
+  --wb-border2: 162 173 198;
+  --wb-orange: 86 73 224;
+  --wb-orange-glow: 118 103 236;
+  --wb-orange-dim: 233 229 255;
+  --wb-green: 16 185 129;
+  --wb-green-dim: 220 252 231;
+  --wb-red: 239 68 68;
+  --wb-red-dim: 254 226 226;
+  --wb-blue: 59 130 246;
+  --wb-blue-dim: 219 234 254;
+  --wb-text: 35 44 62;
+  --wb-muted: 91 102 126;
+  --wb-dim: 117 128 150;
+}
+
+.theme-lifeos-paper {
+  color-scheme: light;
+  --wb-bg: 245 239 226;
+  --wb-surface: 252 249 241;
+  --wb-surface2: 241 231 210;
+  --wb-surface3: 228 215 189;
+  --wb-border: 171 154 124;
+  --wb-border2: 146 130 102;
+  --wb-orange: 89 108 166;
+  --wb-orange-glow: 112 131 188;
+  --wb-orange-dim: 224 231 248;
+  --wb-green: 84 120 88;
+  --wb-green-dim: 226 239 227;
+  --wb-red: 171 81 63;
+  --wb-red-dim: 248 227 221;
+  --wb-blue: 89 108 166;
+  --wb-blue-dim: 224 231 248;
+  --wb-text: 64 54 43;
+  --wb-muted: 110 95 78;
+  --wb-dim: 136 118 98;
+}
+
+.theme-lifeos-brutalist {
+  color-scheme: light;
+  --wb-bg: 248 242 214;
+  --wb-surface: 255 255 255;
+  --wb-surface2: 243 243 243;
+  --wb-surface3: 230 230 230;
+  --wb-border: 17 17 17;
+  --wb-border2: 17 17 17;
+  --wb-orange: 37 99 235;
+  --wb-orange-glow: 59 130 246;
+  --wb-orange-dim: 219 234 254;
+  --wb-green: 22 163 74;
+  --wb-green-dim: 220 252 231;
+  --wb-red: 220 38 38;
+  --wb-red-dim: 254 226 226;
+  --wb-blue: 37 99 235;
+  --wb-blue-dim: 219 234 254;
+  --wb-text: 17 17 17;
+  --wb-muted: 64 64 64;
+  --wb-dim: 99 99 99;
+}
+
+.theme-lifeos-synthwave {
+  color-scheme: dark;
+  --wb-bg: 27 9 47;
+  --wb-surface: 40 17 64;
+  --wb-surface2: 56 30 86;
+  --wb-surface3: 74 44 108;
+  --wb-border: 163 71 255;
+  --wb-border2: 223 97 255;
+  --wb-orange: 255 51 170;
+  --wb-orange-glow: 255 102 204;
+  --wb-orange-dim: 70 20 70;
+  --wb-green: 0 230 187;
+  --wb-green-dim: 8 58 52;
+  --wb-red: 255 94 149;
+  --wb-red-dim: 74 24 44;
+  --wb-blue: 0 214 255;
+  --wb-blue-dim: 12 56 74;
+  --wb-text: 236 220 255;
+  --wb-muted: 179 148 209;
+  --wb-dim: 142 111 172;
+}
+
+.theme-lifeos-terminal {
+  color-scheme: dark;
+  --wb-bg: 7 18 10;
+  --wb-surface: 12 28 15;
+  --wb-surface2: 16 39 21;
+  --wb-surface3: 23 53 29;
+  --wb-border: 34 120 64;
+  --wb-border2: 58 170 92;
+  --wb-orange: 69 255 144;
+  --wb-orange-glow: 120 255 173;
+  --wb-orange-dim: 12 43 22;
+  --wb-green: 69 255 144;
+  --wb-green-dim: 12 43 22;
+  --wb-red: 255 107 107;
+  --wb-red-dim: 62 20 20;
+  --wb-blue: 69 255 144;
+  --wb-blue-dim: 12 43 22;
+  --wb-text: 126 255 170;
+  --wb-muted: 90 200 127;
+  --wb-dim: 68 155 101;
+}
+
+.theme-lifeos-glass {
+  color-scheme: light;
+  --wb-bg: 243 244 255;
+  --wb-surface: 255 255 255;
+  --wb-surface2: 240 241 255;
+  --wb-surface3: 226 228 250;
+  --wb-border: 189 194 228;
+  --wb-border2: 153 162 212;
+  --wb-orange: 99 77 239;
+  --wb-orange-glow: 132 111 250;
+  --wb-orange-dim: 230 226 255;
+  --wb-green: 16 185 129;
+  --wb-green-dim: 220 252 231;
+  --wb-red: 239 68 68;
+  --wb-red-dim: 254 226 226;
+  --wb-blue: 99 77 239;
+  --wb-blue-dim: 230 226 255;
+  --wb-text: 34 43 70;
+  --wb-muted: 89 97 129;
+  --wb-dim: 113 122 153;
+}
+
+.theme-lifeos-kawaii {
+  color-scheme: light;
+  --wb-bg: 255 240 248;
+  --wb-surface: 255 255 255;
+  --wb-surface2: 248 229 247;
+  --wb-surface3: 239 211 238;
+  --wb-border: 236 168 213;
+  --wb-border2: 221 139 192;
+  --wb-orange: 245 117 176;
+  --wb-orange-glow: 255 153 204;
+  --wb-orange-dim: 255 228 240;
+  --wb-green: 34 197 94;
+  --wb-green-dim: 220 252 231;
+  --wb-red: 239 68 68;
+  --wb-red-dim: 254 226 226;
+  --wb-blue: 168 85 247;
+  --wb-blue-dim: 237 233 254;
+  --wb-text: 121 55 108;
+  --wb-muted: 149 88 137;
+  --wb-dim: 176 116 166;
+}
+
+.theme-lifeos-comic {
+  color-scheme: light;
+  --wb-bg: 255 245 184;
+  --wb-surface: 255 255 255;
+  --wb-surface2: 255 240 138;
+  --wb-surface3: 255 228 89;
+  --wb-border: 17 17 17;
+  --wb-border2: 17 17 17;
+  --wb-orange: 225 29 72;
+  --wb-orange-glow: 244 63 94;
+  --wb-orange-dim: 255 228 236;
+  --wb-green: 14 165 233;
+  --wb-green-dim: 224 242 254;
+  --wb-red: 225 29 72;
+  --wb-red-dim: 255 228 236;
+  --wb-blue: 14 165 233;
+  --wb-blue-dim: 224 242 254;
+  --wb-text: 17 17 17;
+  --wb-muted: 75 75 75;
+  --wb-dim: 110 110 110;
+}
+
+.theme-lifeos-midnight {
+  color-scheme: dark;
+  --wb-bg: 13 13 17;
+  --wb-surface: 22 22 28;
+  --wb-surface2: 31 31 39;
+  --wb-surface3: 45 45 56;
+  --wb-border: 61 61 76;
+  --wb-border2: 86 86 109;
+  --wb-orange: 111 96 240;
+  --wb-orange-glow: 142 130 250;
+  --wb-orange-dim: 44 39 90;
+  --wb-green: 16 185 129;
+  --wb-green-dim: 7 43 34;
+  --wb-red: 248 113 113;
+  --wb-red-dim: 67 24 24;
+  --wb-blue: 111 96 240;
+  --wb-blue-dim: 44 39 90;
+  --wb-text: 234 234 244;
+  --wb-muted: 164 164 186;
+  --wb-dim: 124 124 146;
+}
+
+.theme-lifeos-frutiger {
+  color-scheme: light;
+  --wb-bg: 229 245 251;
+  --wb-surface: 255 255 255;
+  --wb-surface2: 227 246 234;
+  --wb-surface3: 207 237 248;
+  --wb-border: 158 208 230;
+  --wb-border2: 110 181 218;
+  --wb-orange: 13 148 136;
+  --wb-orange-glow: 56 189 248;
+  --wb-orange-dim: 224 242 254;
+  --wb-green: 34 197 94;
+  --wb-green-dim: 220 252 231;
+  --wb-red: 239 68 68;
+  --wb-red-dim: 254 226 226;
+  --wb-blue: 14 165 233;
+  --wb-blue-dim: 224 242 254;
+  --wb-text: 34 78 112;
+  --wb-muted: 79 124 154;
+  --wb-dim: 108 147 174;
+}
+
+.theme-lifeos-forest {
+  color-scheme: light;
+  --wb-bg: 240 243 226;
+  --wb-surface: 248 250 237;
+  --wb-surface2: 230 236 210;
+  --wb-surface3: 216 224 189;
+  --wb-border: 170 182 138;
+  --wb-border2: 138 152 108;
+  --wb-orange: 46 125 82;
+  --wb-orange-glow: 74 160 110;
+  --wb-orange-dim: 221 239 228;
+  --wb-green: 46 125 82;
+  --wb-green-dim: 221 239 228;
+  --wb-red: 185 91 61;
+  --wb-red-dim: 248 228 221;
+  --wb-blue: 106 128 68;
+  --wb-blue-dim: 228 236 208;
+  --wb-text: 56 73 45;
+  --wb-muted: 92 110 76;
+  --wb-dim: 120 136 102;
+}
+
+.theme-lifeos-newspaper {
+  color-scheme: light;
+  --wb-bg: 242 236 224;
+  --wb-surface: 250 247 238;
+  --wb-surface2: 236 231 219;
+  --wb-surface3: 222 217 206;
+  --wb-border: 73 73 73;
+  --wb-border2: 35 35 35;
+  --wb-orange: 42 42 42;
+  --wb-orange-glow: 80 80 80;
+  --wb-orange-dim: 229 229 229;
+  --wb-green: 60 60 60;
+  --wb-green-dim: 233 233 233;
+  --wb-red: 139 52 52;
+  --wb-red-dim: 244 226 226;
+  --wb-blue: 52 52 52;
+  --wb-blue-dim: 233 233 233;
+  --wb-text: 26 26 26;
+  --wb-muted: 90 90 90;
+  --wb-dim: 120 120 120;
+}
+
+.theme-lifeos-royal {
+  color-scheme: dark;
+  --wb-bg: 11 30 43;
+  --wb-surface: 18 44 62;
+  --wb-surface2: 28 58 79;
+  --wb-surface3: 44 79 104;
+  --wb-border: 130 108 56;
+  --wb-border2: 175 148 82;
+  --wb-orange: 212 170 67;
+  --wb-orange-glow: 233 196 107;
+  --wb-orange-dim: 64 50 20;
+  --wb-green: 82 177 147;
+  --wb-green-dim: 20 54 46;
+  --wb-red: 220 93 93;
+  --wb-red-dim: 71 24 24;
+  --wb-blue: 212 170 67;
+  --wb-blue-dim: 64 50 20;
+  --wb-text: 234 224 199;
+  --wb-muted: 181 165 126;
+  --wb-dim: 150 133 97;
+}
+
+.theme-lifeos-sunset {
+  color-scheme: light;
+  --wb-bg: 255 239 224;
+  --wb-surface: 255 248 238;
+  --wb-surface2: 255 228 200;
+  --wb-surface3: 255 209 183;
+  --wb-border: 224 167 131;
+  --wb-border2: 205 139 98;
+  --wb-orange: 239 108 72;
+  --wb-orange-glow: 255 142 94;
+  --wb-orange-dim: 255 224 205;
+  --wb-green: 34 197 94;
+  --wb-green-dim: 220 252 231;
+  --wb-red: 220 38 38;
+  --wb-red-dim: 254 226 226;
+  --wb-blue: 217 70 239;
+  --wb-blue-dim: 250 232 255;
+  --wb-text: 101 55 39;
+  --wb-muted: 140 90 69;
+  --wb-dim: 169 116 93;
+}
+
+.theme-lifeos-cyberpunk {
+  color-scheme: dark;
+  --wb-bg: 12 16 31;
+  --wb-surface: 20 26 45;
+  --wb-surface2: 29 36 59;
+  --wb-surface3: 43 53 80;
+  --wb-border: 38 173 179;
+  --wb-border2: 60 224 233;
+  --wb-orange: 250 221 21;
+  --wb-orange-glow: 255 236 95;
+  --wb-orange-dim: 68 60 13;
+  --wb-green: 34 211 238;
+  --wb-green-dim: 12 58 67;
+  --wb-red: 255 80 152;
+  --wb-red-dim: 73 20 47;
+  --wb-blue: 34 211 238;
+  --wb-blue-dim: 12 58 67;
+  --wb-text: 236 236 210;
+  --wb-muted: 163 171 177;
+  --wb-dim: 122 132 141;
+}
+
 html, body {
   background: rgb(var(--wb-bg));
   color: rgb(var(--wb-text));
@@ -316,8 +647,8 @@ body {
   touch-action: manipulation;
 }
 
-/* Prevent accidental pull-to-refresh on main scroll areas */
-main { overscroll-behavior-y: contain; }
+/* Keep wheel scrolling natural on desktop while preserving controlled scroll area */
+main { overscroll-behavior-y: auto; }
 
 @layer components {
   /* ── Cards ──────────────────────────────────────────────────── */

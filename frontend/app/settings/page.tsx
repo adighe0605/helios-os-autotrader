@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { AlertTriangle, Monitor, Palette, PlayCircle, Power, RotateCcw, Save, Shield } from "lucide-react";
+import { AlertTriangle, Palette, PlayCircle, Power, Save, Shield } from "lucide-react";
 
 import { api } from "@/lib/api";
 import { cn } from "@/lib/format";
@@ -10,28 +10,40 @@ import { RiskGauge } from "@/components/RiskGauge";
 import type { RiskLimits } from "@/lib/types";
 
 type ThemeKey =
-  | "theme-webull-dark"
-  | "theme-webull-light"
-  | "theme-tradingview-dark"
-  | "theme-tradingview-light"
-  | "theme-bloomberg-dark"
-  | "theme-bloomberg-light"
-  | "theme-robinhood-dark"
-  | "theme-robinhood-light";
-type ThemeMode = ThemeKey | "system";
+  | "theme-lifeos-default"
+  | "theme-lifeos-paper"
+  | "theme-lifeos-brutalist"
+  | "theme-lifeos-synthwave"
+  | "theme-lifeos-terminal"
+  | "theme-lifeos-glass"
+  | "theme-lifeos-kawaii"
+  | "theme-lifeos-comic"
+  | "theme-lifeos-midnight"
+  | "theme-lifeos-frutiger"
+  | "theme-lifeos-forest"
+  | "theme-lifeos-newspaper"
+  | "theme-lifeos-royal"
+  | "theme-lifeos-sunset"
+  | "theme-lifeos-cyberpunk";
 
 const THEME_STORAGE_KEY = "helios-theme";
-const DEFAULT_THEME: ThemeKey = "theme-webull-dark";
-
-const THEMES: Array<{ key: ThemeKey; name: string; swatch: string }> = [
-  { key: "theme-webull-dark", name: "WeBull Style — Dark", swatch: "linear-gradient(135deg,#0d1117,#f59e0b)" },
-  { key: "theme-webull-light", name: "WeBull Style — Light", swatch: "linear-gradient(135deg,#ffffff,#f59e0b)" },
-  { key: "theme-tradingview-dark", name: "TradingView Style — Dark", swatch: "linear-gradient(135deg,#131722,#3b82f6)" },
-  { key: "theme-tradingview-light", name: "TradingView Style — Light", swatch: "linear-gradient(135deg,#ffffff,#3b82f6)" },
-  { key: "theme-bloomberg-dark", name: "Bloomberg Style — Dark", swatch: "linear-gradient(135deg,#050505,#f97316)" },
-  { key: "theme-bloomberg-light", name: "Bloomberg Style — Light", swatch: "linear-gradient(135deg,#fff8e6,#f97316)" },
-  { key: "theme-robinhood-dark", name: "Robinhood Style — Dark", swatch: "linear-gradient(135deg,#0b1410,#22c55e)" },
-  { key: "theme-robinhood-light", name: "Robinhood Style — Light", swatch: "linear-gradient(135deg,#ffffff,#22c55e)" },
+const DEFAULT_THEME: ThemeKey = "theme-lifeos-default";
+const THEMES: Array<{ key: ThemeKey; name: string }> = [
+  { key: "theme-lifeos-default", name: "LifeOS Default" },
+  { key: "theme-lifeos-paper", name: "Paper" },
+  { key: "theme-lifeos-brutalist", name: "Brutalist" },
+  { key: "theme-lifeos-synthwave", name: "Synthwave" },
+  { key: "theme-lifeos-terminal", name: "Terminal" },
+  { key: "theme-lifeos-glass", name: "Glass" },
+  { key: "theme-lifeos-kawaii", name: "Kawaii" },
+  { key: "theme-lifeos-comic", name: "Comic" },
+  { key: "theme-lifeos-midnight", name: "Midnight" },
+  { key: "theme-lifeos-frutiger", name: "Frutiger" },
+  { key: "theme-lifeos-forest", name: "Forest" },
+  { key: "theme-lifeos-newspaper", name: "Newspaper" },
+  { key: "theme-lifeos-royal", name: "Royal" },
+  { key: "theme-lifeos-sunset", name: "Sunset" },
+  { key: "theme-lifeos-cyberpunk", name: "Cyberpunk" },
 ];
 
 export default function SettingsPage() {
@@ -40,69 +52,30 @@ export default function SettingsPage() {
   const [showLiveConfirm, setShowLiveConfirm] = useState(false);
   const [aggressiveness, setAggressiveness] = useState(50);
   const [saving, setSaving] = useState(false);
-  const [theme, setTheme] = useState<ThemeMode>(DEFAULT_THEME);
+  const [theme, setTheme] = useState<ThemeKey>(DEFAULT_THEME);
 
   useEffect(() => { api.riskLimits().then(setLimits); }, []);
   useEffect(() => {
     const saved = localStorage.getItem(THEME_STORAGE_KEY);
-    if (saved === "system") {
-      setTheme("system");
-      applyResolvedTheme(resolveSystemTheme());
-      return;
-    }
-    if (isThemeKey(saved)) {
-      setTheme(saved);
-      applyResolvedTheme(saved);
-      return;
-    }
-    setTheme(DEFAULT_THEME);
-    applyResolvedTheme(DEFAULT_THEME);
+    const next = isThemeKey(saved) ? saved : DEFAULT_THEME;
+    setTheme(next);
+    applyTheme(next);
   }, []);
-
-  useEffect(() => {
-    if (theme !== "system") return;
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = () => applyResolvedTheme(resolveSystemTheme());
-    if (mq.addEventListener) mq.addEventListener("change", handler);
-    else mq.addListener(handler);
-    return () => {
-      if (mq.removeEventListener) mq.removeEventListener("change", handler);
-      else mq.removeListener(handler);
-    };
-  }, [theme]);
-
-  function applyResolvedTheme(next: ThemeKey) {
-    const root = document.documentElement;
-    THEMES.forEach((t) => root.classList.remove(t.key));
-    root.classList.add(next);
-  }
-
-  function resolveSystemTheme(): ThemeKey {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "theme-webull-dark"
-      : "theme-webull-light";
-  }
 
   function isThemeKey(value: string | null): value is ThemeKey {
     return !!value && THEMES.some((t) => t.key === value);
   }
 
-  function applyTheme(next: ThemeMode) {
-    if (next === "system") {
-      localStorage.setItem(THEME_STORAGE_KEY, "system");
-      setTheme("system");
-      applyResolvedTheme(resolveSystemTheme());
-      return;
-    }
-    localStorage.setItem(THEME_STORAGE_KEY, next);
-    setTheme(next);
-    applyResolvedTheme(next);
+  function applyTheme(next: ThemeKey) {
+    const root = document.documentElement;
+    THEMES.forEach((t) => root.classList.remove(t.key));
+    root.classList.add(next);
   }
 
-  function resetTheme() {
-    localStorage.removeItem(THEME_STORAGE_KEY);
-    setTheme(DEFAULT_THEME);
-    applyResolvedTheme(DEFAULT_THEME);
+  function onThemeChange(next: ThemeKey) {
+    setTheme(next);
+    localStorage.setItem(THEME_STORAGE_KEY, next);
+    applyTheme(next);
   }
 
   async function save() {
@@ -125,18 +98,18 @@ export default function SettingsPage() {
         <p className="text-[12px] text-wb-muted mt-0.5">Configure trading parameters and risk limits</p>
       </div>
 
-      {/* Interactive demo */}
+      {/* Demo video */}
       <section className="bg-wb-surface border border-wb-border rounded-xl overflow-hidden shadow-card">
         <div className="px-4 py-3 border-b border-wb-border">
           <span className="text-[13px] font-semibold text-wb-text">Product Demo</span>
         </div>
         <div className="px-4 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
           <p className="text-[13px] text-wb-muted">
-            Watch the guided walkthrough for Dashboard, Trade, AI Agents, Backtest, and Settings.
+            Watch the MP4 walkthrough for Dashboard, Trade, AI Agents, Backtest, and Settings.
           </p>
           <Link href="/demo" className="btn btn-primary whitespace-nowrap">
             <PlayCircle className="w-4 h-4" />
-            Open Interactive Demo
+            Open Demo Video
           </Link>
         </div>
       </section>
@@ -145,53 +118,19 @@ export default function SettingsPage() {
       <section className="bg-wb-surface border border-wb-border rounded-xl overflow-hidden shadow-card">
         <div className="px-4 py-3 border-b border-wb-border flex items-center gap-2">
           <Palette className="w-4 h-4 text-wb-orange" />
-          <span className="text-[13px] font-semibold text-wb-text">Themes</span>
+          <span className="text-[13px] font-semibold text-wb-text">Themes (LifeOS)</span>
         </div>
         <div className="p-4">
-          <p className="text-[13px] text-wb-muted mb-3">
-            Pick a professional style — each theme has a clean light and dark variant.
-          </p>
-          <div className="flex items-center justify-between gap-2 mb-3">
-            <button
-              onClick={() => applyTheme("system")}
-              className={cn(
-                "flex items-center gap-2 px-3 h-9 rounded-lg border text-[12px] font-semibold transition-all",
-                theme === "system"
-                  ? "border-wb-orange bg-wb-orange/10 text-wb-orange"
-                  : "border-wb-border bg-wb-surface2 text-wb-muted hover:text-wb-text hover:border-wb-border2"
-              )}
-            >
-              <Monitor className="w-4 h-4" />
-              System Theme (Auto)
-            </button>
-            <button onClick={resetTheme} className="btn btn-ghost btn-sm">
-              <RotateCcw className="w-3.5 h-3.5" />
-              Reset Default
-            </button>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {THEMES.map((t) => {
-              const active = theme === t.key;
-              return (
-                <button
-                  key={t.key}
-                  onClick={() => applyTheme(t.key)}
-                  className={cn(
-                    "text-left p-3 rounded-xl border transition-all duration-150 min-h-[44px]",
-                    active
-                      ? "border-wb-orange bg-wb-orange/10 shadow-card"
-                      : "border-wb-border bg-wb-surface2 hover:border-wb-border2 hover:bg-wb-surface3"
-                  )}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="w-7 h-7 rounded-lg border border-wb-border/30" style={{ background: t.swatch }} />
-                    <span className="text-[13px] font-semibold text-wb-text">{t.name}</span>
-                  </div>
-                  <div className="text-[11px] text-wb-muted mt-1">{t.key.includes("light") ? "Light mode" : "Dark mode"}</div>
-                </button>
-              );
-            })}
-          </div>
+          <label className="block text-[12px] text-wb-muted mb-1.5">Choose theme</label>
+          <select
+            value={theme}
+            onChange={(e) => onThemeChange(e.target.value as ThemeKey)}
+            className="wb-input"
+          >
+            {THEMES.map((t) => (
+              <option key={t.key} value={t.key}>{t.name}</option>
+            ))}
+          </select>
         </div>
       </section>
 

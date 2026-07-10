@@ -49,6 +49,33 @@ export type Order = {
   confidence?: number | null;
 };
 
+export type TradeHistoryItem = {
+  id: string;
+  order_id: string | null;
+  symbol: string;
+  side: "buy" | "sell" | "buy_to_cover" | "sell_short";
+  qty: number;
+  price: number;
+  gross_value: number;
+  realized_pnl: number | null;
+  running_position_qty: number;
+  avg_cost_after: number | null;
+  mode: Mode;
+  executed_at: string;
+};
+
+export type TradeHistoryResponse = {
+  range_days: number;
+  summary: {
+    total_trades: number;
+    realized_pnl: number;
+    wins: number;
+    losses: number;
+    turnover: number;
+  };
+  trades: TradeHistoryItem[];
+};
+
 export type AgentSignal = {
   agent: string;
   verdict: "buy" | "sell" | "hold";
@@ -57,10 +84,40 @@ export type AgentSignal = {
   indicators: Record<string, unknown>;
 };
 
+export type AgentContribution = {
+  agent: string;
+  weight: number;
+  score: number;
+  confidence: number;
+  data_quality: number;
+  freshness_minutes: number | null;
+  verdict: "buy" | "sell" | "hold";
+  weighted_score: number;
+  supporting_data: string[];
+  is_real_data: boolean;
+  data_source: string;
+};
+
 export type TradeDecision = {
   symbol: string;
   verdict: "buy" | "sell" | "hold";
   confidence: number;
+  confidence_score: number;
+  score: number;
+  recommendation: string;
+  positionSize: string;
+  risk: "Low" | "Medium" | "High" | "Extreme";
+  agreement: "High" | "Medium" | "Low";
+  bullishSignals: string[];
+  bearishSignals: string[];
+  conflictingSignals: string[];
+  supportingEvidence: string[];
+  nextReview: string;
+  risk_vetoed: boolean;
+  risk_veto_reason: string | null;
+  agent_contributions: AgentContribution[];
+  section_scores: Record<string, number>;
+  section_data_status: Record<string, boolean>;
   reasoning: string;
   risk_reward: number | null;
   stop_loss: number | null;
@@ -140,6 +197,8 @@ export type AutoTradeStatus = {
   min_volume: number;
   max_position_pct: number;
   max_concurrent_positions: number;
+  penny_allocation_pct: number;
+  other_allocation_pct: number;
   market_open: boolean;
   last_scan_at: string | null;
   scan_count: number;
@@ -152,4 +211,6 @@ export type AutoTradeSettings = {
   min_volume?: number;
   max_position_pct?: number;
   max_concurrent_positions?: number;
+  penny_allocation_pct?: number;
+  other_allocation_pct?: number;
 };

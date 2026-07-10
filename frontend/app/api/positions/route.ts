@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
-import { tradingFetch, isAlpacaConnected } from "@/lib/alpaca-server";
+import { tradingFetch, isAlpacaConnected, alpacaMode } from "@/lib/alpaca-server";
 
 export async function GET() {
-  if (!isAlpacaConnected()) return NextResponse.json([]);
+  if (!isAlpacaConnected()) {
+    return NextResponse.json({ error: "Alpaca paper account is not connected." }, { status: 503 });
+  }
+  if (alpacaMode() !== "paper") {
+    return NextResponse.json({ error: "Dashboard positions are restricted to Alpaca paper mode." }, { status: 409 });
+  }
   try {
     const positions = await tradingFetch<any[]>("/v2/positions");
     return NextResponse.json(

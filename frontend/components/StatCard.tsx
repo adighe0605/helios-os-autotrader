@@ -10,6 +10,7 @@ type Props = {
   deltaPrefix?: string;
   icon?: LucideIcon;
   accent?: "default" | "pos" | "neg" | "warn";
+  onClick?: () => void;
 };
 
 const accentGradient: Record<string, string> = {
@@ -26,12 +27,19 @@ const iconBg: Record<string, string> = {
   warn:    "bg-wb-orange/10 text-wb-orange",
 };
 
-export function StatCard({ label, value, delta, deltaPrefix, icon: Icon, accent = "default" }: Props) {
+export function StatCard({ label, value, delta, deltaPrefix, icon: Icon, accent = "default", onClick }: Props) {
   const pos = (delta ?? 0) >= 0;
 
   return (
-    <div className="relative bg-wb-surface border border-wb-border rounded-xl overflow-hidden shadow-card
-                    hover:shadow-card-hover hover:border-wb-border2 transition-all duration-200 cursor-default">
+    <div
+      onClick={onClick}
+      className={cn(
+        "relative bg-wb-surface border border-wb-border rounded-xl overflow-hidden shadow-card transition-all duration-200",
+        onClick
+          ? "cursor-pointer hover:shadow-card-hover hover:border-wb-orange/40 active:scale-[0.98] select-none"
+          : "cursor-default"
+      )}
+    >
       {/* Gradient top accent line */}
       <div className={cn("absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r", accentGradient[accent])} />
 

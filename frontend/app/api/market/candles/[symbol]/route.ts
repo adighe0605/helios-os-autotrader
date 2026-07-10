@@ -19,16 +19,36 @@ export async function GET(
   if (!isAlpacaConnected()) {
     return NextResponse.json(mockCandles(sym, limit));
   }
+
+  const now = new Date();
+  let startDays = 30;
+  if (tf === "1d") {
+    startDays = Math.max(30, limit * 2);
+  } else if (tf === "1w") {
+    startDays = Math.max(90, limit * 8);
+  } else if (tf === "1m") {
+    startDays = Math.max(2, Math.ceil(limit / 390) + 1);
+  } else if (tf === "5m") {
+    startDays = Math.max(3, Math.ceil(limit / 78) + 1);
+  } else if (tf === "15m") {
+    startDays = Math.max(5, Math.ceil(limit / 26) + 1);
+  } else if (tf === "1h") {
+    startDays = Math.max(10, Math.ceil(limit / 7) + 1);
+  }
+  const startDate = new Date(now.getTime() - startDays * 24 * 60 * 60 * 1000);
+  const startStr = startDate.toISOString();
+
   try {
     const data = await dataFetch<{ bars: any[] }>(
-      `/v2/stocks/${encodeURIComponent(sym)}/bars?timeframe=${timeframe}&limit=${limit}&feed=iex&sort=asc`
+      `/v2/stocks/${encodeURIComponent(sym)}/bars?timeframe=${timeframe}&limit=${limit}&feed=iex&sort=desc&start=${encodeURIComponent(startStr)}`
     );
     const bars = data?.bars ?? [];
     if (bars.length === 0) {
       return NextResponse.json(mockCandles(sym, limit));
     }
+    const reversed = [...bars].reverse();
     return NextResponse.json(
-      bars.map((b) => ({ t: b.t, o: b.o, h: b.h, l: b.l, c: b.c, v: b.v }))
+      reversed.map((b) => ({ t: b.t, o: b.o, h: b.h, l: b.l, c: b.c, v: b.v }))
     );
   } catch (e: any) {
     return NextResponse.json(mockCandles(sym, limit));

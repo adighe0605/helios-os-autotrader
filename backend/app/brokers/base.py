@@ -73,3 +73,6 @@ class Broker(ABC):
 
     @abstractmethod
     def orders(self, status: str = "all", limit: int = 50) -> list[BrokerOrder]: ...
+
+    @abstractmethod
+    def history(self) -> dict: ...

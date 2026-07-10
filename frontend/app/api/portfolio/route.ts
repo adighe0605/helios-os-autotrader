@@ -3,11 +3,10 @@ import { tradingFetch, isAlpacaConnected, alpacaMode } from "@/lib/alpaca-server
 
 export async function GET() {
   if (!isAlpacaConnected()) {
-    return NextResponse.json({
-      cash: 100_000, equity: 100_000, buying_power: 200_000,
-      portfolio_value: 100_000, day_pnl: 0, day_pnl_pct: 0,
-      total_pnl: 0, total_pnl_pct: 0, mode: "mock",
-    });
+    return NextResponse.json({ error: "Alpaca paper account is not connected." }, { status: 503 });
+  }
+  if (alpacaMode() !== "paper") {
+    return NextResponse.json({ error: "Dashboard is restricted to Alpaca paper mode." }, { status: 409 });
   }
   try {
     const a = await tradingFetch<Record<string, string>>("/v2/account");
