@@ -764,12 +764,17 @@ main { overscroll-behavior-y: auto; }
 ::-webkit-scrollbar-thumb:hover { background: rgb(var(--wb-border) / 0.45); }
 
 /* ── Ticker bar ──────────────────────────────────────────────────── */
+@keyframes tickerScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 .ticker-track {
   display: flex;
   align-items: center;
   white-space: nowrap;
   will-change: transform;
-  animation: tickerScroll 45s linear infinite;
+  animation: tickerScroll 40s linear infinite;
 }
 .ticker-track:hover { animation-play-state: paused; }
 
