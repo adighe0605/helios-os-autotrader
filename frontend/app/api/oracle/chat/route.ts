@@ -120,6 +120,45 @@ export async function POST(req: NextRequest) {
   const p = prompt.toLowerCase();
 
   try {
+    // ── 0. EXPLAIN P&L / WHY questions ─────────────────────────────────────
+    if (matchesAny(p, ["why", "how did i make", "how did i gain", "how did i earn", "explain", "where did", "what caused", "if zero trades", "0 trades", "no trades"])) {
+      const [acc, positions, fills] = await Promise.all([
+        getAccount(),
+        getPositions(),
+        getRecentFills(1),
+      ]);
+      const equity = parseFloat(acc.equity);
+      const lastEquity = parseFloat(acc.last_equity);
+      const dayPnl = equity - lastEquity;
+      const dayPct = lastEquity > 0 ? (dayPnl / lastEquity) * 100 : 0;
+      const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+      const todayFills = fills.filter((f) => f.transaction_time && new Date(f.transaction_time) >= todayStart);
+
+      const posLines = positions.map((pos) => {
+        const unreal = parseFloat(pos.unrealized_pl);
+        const unrPct = parseFloat(pos.unrealized_plpc) * 100;
+        return `• **${pos.symbol}**: ${pos.qty} shares → Unrealized \`${fmt(unreal)}\` (${fmtPct(unrPct)})`;
+      }).join("\n");
+
+      return NextResponse.json({
+        response:
+          `### 📊 Why Do I Have P&L With No Trades?\n\n` +
+          `**Source:** Alpaca Account API + Positions API\n\n` +
+          `**Day P&L: \`${fmt(dayPnl)}\` (${fmtPct(dayPct)}) — this is 100% unrealized, not from new trades.**\n\n` +
+          `#### How this works:\n` +
+          `Day P&L measures the change in your **total portfolio value** since yesterday's market close. Even with **${todayFills.length} new fills today**, your existing open positions change in value as prices move.\n\n` +
+          `Think of it like owning a house — if property prices rise today, you are "up" even though you made no transactions.\n\n` +
+          (positions.length > 0
+            ? `#### Your ${positions.length} Open Position${positions.length > 1 ? "s" : ""} driving today's P&L:\n${posLines}\n\n`
+            : "") +
+          `#### The math:\n` +
+          `• Yesterday closing equity: \`$${lastEquity.toLocaleString("en-US", { minimumFractionDigits: 2 })}\`\n` +
+          `• Today current equity: \`$${equity.toLocaleString("en-US", { minimumFractionDigits: 2 })}\`\n` +
+          `• Difference (Day P&L): \`${fmt(dayPnl)}\`\n\n` +
+          `This P&L becomes **realized** only when you close (sell) the position.`,
+      });
+    }
+
     // ── 1. TODAY'S PERFORMANCE ──────────────────────────────────────────────
     if (matchesAny(p, ["today", "how did i do", "make today", "do today", "daily", "day pnl", "day p&l"])) {
       const [acc, positions, fills] = await Promise.all([
