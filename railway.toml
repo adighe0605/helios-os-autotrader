@@ -1,6 +1,7 @@
-# Railway deployment config for the backend services.
-# Connect this repo in Railway and it will use this file.
-# Add Postgres + Redis as Railway plugins (one click in the Railway dashboard).
+# Railway config for the API service.
+# This file is used by the "api" Railway service.
+# The "worker" and "beat" services use the same Dockerfile
+# but override the start command in Railway dashboard settings.
 
 [build]
   builder        = "DOCKERFILE"
@@ -8,19 +9,8 @@
   buildContext   = "backend"
 
 [deploy]
-  startCommand        = "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
-  healthcheckPath     = "/health"
-  healthcheckTimeout  = 30
-  restartPolicyType   = "ON_FAILURE"
+  startCommand            = "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+  healthcheckPath         = "/health"
+  healthcheckTimeout      = 30
+  restartPolicyType       = "ON_FAILURE"
   restartPolicyMaxRetries = 5
-
-[[services]]
-  name = "api"
-
-[[services]]
-  name = "worker"
-  startCommand = "celery -A app.workers.celery_app worker --loglevel=INFO --concurrency=2"
-
-[[services]]
-  name = "beat"
-  startCommand = "celery -A app.workers.celery_app beat --loglevel=INFO"
