@@ -12,38 +12,60 @@ type Props = {
   accent?: "default" | "pos" | "neg" | "warn";
 };
 
-const accentBar: Record<string, string> = {
-  default: "bg-wb-orange",
-  pos:     "bg-wb-green",
-  neg:     "bg-wb-red",
-  warn:    "bg-wb-orange",
+const accentGradient: Record<string, string> = {
+  default: "from-wb-orange/60 to-transparent",
+  pos:     "from-wb-green/60 to-transparent",
+  neg:     "from-wb-red/60 to-transparent",
+  warn:    "from-wb-orange/60 to-transparent",
+};
+
+const iconBg: Record<string, string> = {
+  default: "bg-wb-orange/10 text-wb-orange",
+  pos:     "bg-wb-green/10 text-wb-green",
+  neg:     "bg-wb-red/10 text-wb-red",
+  warn:    "bg-wb-orange/10 text-wb-orange",
 };
 
 export function StatCard({ label, value, delta, deltaPrefix, icon: Icon, accent = "default" }: Props) {
   const pos = (delta ?? 0) >= 0;
-  return (
-    <div className="relative bg-wb-surface border border-wb-border overflow-hidden">
-      {/* Left accent bar */}
-      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px]", accentBar[accent])} />
 
-      <div className="px-4 py-3 pl-5">
-        <div className="eyebrow mb-1.5">{label}</div>
-        <div className="text-[18px] font-bold num text-wb-text tracking-tight">{value}</div>
+  return (
+    <div className="relative bg-wb-surface border border-wb-border rounded-xl overflow-hidden shadow-card
+                    hover:shadow-card-hover hover:border-wb-border2 transition-all duration-200 cursor-default">
+      {/* Gradient top accent line */}
+      <div className={cn("absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r", accentGradient[accent])} />
+
+      <div className="px-4 pt-4 pb-3.5">
+        {/* Label row */}
+        <div className="flex items-center justify-between mb-2">
+          <span className="section-label">{label}</span>
+          {Icon && (
+            <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", iconBg[accent])}>
+              <Icon className="w-3.5 h-3.5" strokeWidth={2} />
+            </div>
+          )}
+        </div>
+
+        {/* Value */}
+        <div className="text-[22px] font-bold num text-wb-text tracking-tight leading-none">
+          {value}
+        </div>
+
+        {/* Delta pill */}
         {delta !== undefined && (
-          <div className={cn("mt-1 flex items-center gap-0.5 text-xs num font-medium",
-            pos ? "pos-text" : "neg-text")}>
-            {pos ? <ArrowUpRight className="size-3" /> : <ArrowDownRight className="size-3" />}
-            {deltaPrefix ?? ""}{fmt.pct(delta)}
+          <div className="mt-2">
+            <span className={cn(
+              "inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-semibold num",
+              pos
+                ? "bg-wb-green/10 text-wb-green"
+                : "bg-wb-red/10 text-wb-red"
+            )}>
+              {pos ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+              {deltaPrefix ?? ""}{fmt.pct(delta)}
+            </span>
           </div>
         )}
       </div>
-
-      {Icon && (
-        <div className="absolute right-4 top-1/2 -translate-y-1/2">
-          <Icon className={cn("size-5", accent === "pos" ? "text-wb-green" : accent === "neg" ? "text-wb-red" : "text-wb-orange")}
-            strokeWidth={1.5} />
-        </div>
-      )}
     </div>
   );
 }

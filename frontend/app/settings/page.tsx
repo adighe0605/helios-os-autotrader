@@ -31,49 +31,50 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-3 max-w-4xl">
-      <div className="flex items-center border-b border-wb-border pb-2">
-        <h1 className="text-[13px] font-semibold text-wb-text">Settings</h1>
+    <div className="space-y-4 max-w-4xl">
+      <div>
+        <h1 className="text-[18px] font-bold text-wb-text tracking-tight">Settings</h1>
+        <p className="text-[12px] text-wb-muted mt-0.5">Configure trading parameters and risk limits</p>
       </div>
 
       {/* Trading mode */}
-      <section className="bg-wb-surface border border-wb-border overflow-hidden">
-        <div className="px-4 py-2.5 border-b border-wb-border bg-wb-surface2 flex items-center justify-between">
-          <span className="text-[11px] font-semibold text-wb-text">Trading Mode</span>
-          <div className="flex gap-px bg-wb-surface3 border border-wb-border overflow-hidden">
+      <section className="bg-wb-surface border border-wb-border rounded-xl overflow-hidden shadow-card">
+        <div className="px-4 py-3 border-b border-wb-border flex items-center justify-between">
+          <span className="text-[13px] font-semibold text-wb-text">Trading Mode</span>
+          <div className="flex gap-1 bg-wb-surface2 border border-wb-border rounded-lg p-0.5">
             {(["paper", "live"] as const).map((m) => (
               <button key={m}
                 onClick={() => m === "live" ? setShowLiveConfirm(true) : setMode("paper")}
                 className={cn(
-                  "px-3 py-1.5 text-[11px] font-bold transition uppercase",
+                  "px-3 h-7 rounded-md text-[12px] font-bold uppercase transition-all duration-150 cursor-pointer",
                   mode === m
-                    ? m === "live" ? "bg-wb-orange text-black" : "bg-wb-green text-black"
-                    : "text-wb-dim hover:text-wb-text"
+                    ? m === "live" ? "bg-wb-orange text-black shadow-sm" : "bg-wb-green text-black shadow-sm"
+                    : "text-wb-dim hover:text-wb-muted"
                 )}>
                 {m}
               </button>
             ))}
           </div>
         </div>
-        <div className="px-4 py-3">
-          <p className="text-[12px] text-wb-muted">
+        <div className="px-4 py-3.5">
+          <p className="text-[13px] text-wb-muted">
             Paper mode simulates fills against live quotes. Live mode submits real orders to Alpaca.
           </p>
           {showLiveConfirm && (
-            <div className="mt-3 p-3 border border-wb-orange/30 bg-wb-orange-dim">
-              <div className="flex items-start gap-2">
-                <AlertTriangle className="size-4 text-wb-orange shrink-0 mt-0.5" />
-                <div className="text-[12px]">
-                  <div className="font-semibold text-wb-orange mb-1">Live trading submits real orders.</div>
-                  <p className="text-wb-muted mb-3">
-                    Requires <code className="text-wb-text">TRADING_MODE=live</code> in backend <code className="text-wb-text">.env</code> and live Alpaca API keys.
+            <div className="mt-3 p-4 border border-wb-orange/20 bg-wb-orange/5 rounded-lg animate-fadeIn">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-4 h-4 text-wb-orange shrink-0 mt-0.5" />
+                <div>
+                  <div className="text-[13px] font-semibold text-wb-orange mb-1">Live trading submits real orders.</div>
+                  <p className="text-[12px] text-wb-muted mb-3">
+                    Requires <code className="text-wb-text bg-wb-surface2 px-1 py-0.5 rounded text-[11px]">TRADING_MODE=live</code> in backend <code className="text-wb-text bg-wb-surface2 px-1 py-0.5 rounded text-[11px]">.env</code> and live Alpaca API keys.
                   </p>
                   <div className="flex gap-2">
                     <button onClick={() => { setMode("live"); setShowLiveConfirm(false); }}
-                      className="px-4 py-2.5 min-h-[44px] text-[12px] bg-wb-orange text-black font-bold">
+                      className="btn btn-primary btn-sm">
                       I understand — enable live
                     </button>
-                    <button onClick={() => setShowLiveConfirm(false)} className="btn-ghost text-[12px] py-1.5">Cancel</button>
+                    <button onClick={() => setShowLiveConfirm(false)} className="btn btn-ghost btn-sm">Cancel</button>
                   </div>
                 </div>
               </div>
@@ -83,36 +84,38 @@ export default function SettingsPage() {
       </section>
 
       {/* Kill switch */}
-      <section className="bg-wb-surface border border-wb-border overflow-hidden">
-        <div className="px-4 py-2.5 border-b border-wb-border bg-wb-surface2 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Shield className="size-3.5 text-wb-orange" />
-            <span className="text-[11px] font-semibold text-wb-text">Kill Switch</span>
+      <section className="bg-wb-surface border border-wb-border rounded-xl overflow-hidden shadow-card">
+        <div className="px-4 py-3 border-b border-wb-border flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-wb-orange/10 flex items-center justify-center">
+              <Shield className="w-3.5 h-3.5 text-wb-orange" />
+            </div>
+            <span className="text-[13px] font-semibold text-wb-text">Kill Switch</span>
           </div>
           <button onClick={toggleKillSwitch}
             className={cn(
-              "flex items-center gap-1.5 text-[12px] font-bold px-3 py-2.5 min-h-[40px] border transition",
+              "btn btn-sm font-semibold",
               limits?.kill_switch_armed
-                ? "bg-wb-red-dim text-wb-red border-wb-red/25 hover:bg-wb-red/20"
-                : "bg-wb-surface3 text-wb-muted border-wb-border hover:text-wb-text"
+                ? "bg-wb-red/10 text-wb-red border border-wb-red/20 hover:bg-wb-red/20"
+                : "btn-ghost"
             )}>
-            <Power className="size-3.5" />
+            <Power className="w-3.5 h-3.5" />
             {limits?.kill_switch_armed ? "Disarm" : "Arm"}
           </button>
         </div>
-        <p className="px-4 py-3 text-[12px] text-wb-muted">
+        <p className="px-4 py-3.5 text-[13px] text-wb-muted">
           Cancels all open orders and blocks new entries until disarmed.
         </p>
       </section>
 
       {/* Risk limits */}
-      <section className="bg-wb-surface border border-wb-border overflow-hidden">
-        <div className="px-4 py-2.5 border-b border-wb-border bg-wb-surface2">
-          <span className="text-[11px] font-semibold text-wb-text">Risk Limits</span>
+      <section className="bg-wb-surface border border-wb-border rounded-xl overflow-hidden shadow-card">
+        <div className="px-4 py-3 border-b border-wb-border">
+          <span className="text-[13px] font-semibold text-wb-text">Risk Limits</span>
         </div>
         <div className="p-4">
           {limits ? (
-            <div className="grid sm:grid-cols-2 gap-3">
+            <div className="grid sm:grid-cols-2 gap-4">
               <NumberField label="Max Daily Loss (%)" value={limits.max_daily_loss_pct}
                 onChange={(v) => setLimits({ ...limits, max_daily_loss_pct: v })} min={0.1} max={20} step={0.1} />
               <NumberField label="Max Position Size (% of equity)" value={limits.max_position_pct}
@@ -124,39 +127,42 @@ export default function SettingsPage() {
               <NumberField label="Cooldown After Loss (min)" value={limits.cooldown_after_loss_min}
                 onChange={(v) => setLimits({ ...limits, cooldown_after_loss_min: v })} min={0} max={240} step={1} />
             </div>
-          ) : <div className="text-wb-dim text-[12px]">Loading…</div>}
+          ) : <div className="text-wb-dim text-[13px]">Loading…</div>}
 
           {limits && (
-            <div className="mt-4 grid sm:grid-cols-3 gap-2">
+            <div className="mt-5 grid sm:grid-cols-3 gap-3">
               <RiskGauge label="Daily Loss" value={0.4} max={limits.max_daily_loss_pct} />
               <RiskGauge label="Position Concentration" value={6.2} max={limits.max_position_pct} />
               <RiskGauge label="Trades Today" value={4} max={limits.max_trades_per_day} suffix="" />
             </div>
           )}
 
-          <div className="mt-4 flex justify-end">
+          <div className="mt-5 flex justify-end">
             <button onClick={save} disabled={saving || !limits}
-              className="flex items-center gap-1.5 px-4 py-2 bg-wb-orange text-black text-[12px] font-bold disabled:opacity-50 hover:brightness-110 transition">
-              <Save className="size-3.5" /> {saving ? "Saving…" : "Save Limits"}
+              className="btn btn-primary disabled:opacity-50">
+              <Save className="w-3.5 h-3.5" />
+              {saving ? "Saving…" : "Save Limits"}
             </button>
           </div>
         </div>
       </section>
 
       {/* AI aggressiveness */}
-      <section className="bg-wb-surface border border-wb-border overflow-hidden">
-        <div className="px-4 py-2.5 border-b border-wb-border bg-wb-surface2">
-          <span className="text-[11px] font-semibold text-wb-text">AI Aggressiveness</span>
+      <section className="bg-wb-surface border border-wb-border rounded-xl overflow-hidden shadow-card">
+        <div className="px-4 py-3 border-b border-wb-border">
+          <span className="text-[13px] font-semibold text-wb-text">AI Aggressiveness</span>
         </div>
         <div className="px-4 py-4">
-          <p className="text-[12px] text-wb-muted mb-3">
+          <p className="text-[13px] text-wb-muted mb-4">
             Lower values bias the committee toward HOLD; higher values lower the confidence threshold for action.
           </p>
           <input type="range" min={0} max={100} value={aggressiveness}
             onChange={(e) => setAggressiveness(+e.target.value)}
-            className="w-full accent-[#F0A400]" />
-          <div className="flex justify-between text-[11px] text-wb-dim num mt-1">
-            <span>Conservative</span><span className="text-wb-orange font-semibold">{aggressiveness}</span><span>Aggressive</span>
+            className="w-full accent-wb-orange h-1.5 cursor-pointer" />
+          <div className="flex justify-between text-[12px] text-wb-dim num mt-2">
+            <span>Conservative</span>
+            <span className="warn-text font-semibold">{aggressiveness}</span>
+            <span>Aggressive</span>
           </div>
         </div>
       </section>
@@ -170,9 +176,10 @@ function NumberField({ label, value, onChange, min, max, step }: {
 }) {
   return (
     <label className="block">
-      <span className="block text-[11px] text-wb-muted mb-1">{label}</span>
+      <span className="block text-[12px] text-wb-muted mb-1.5">{label}</span>
       <input type="number" value={value} min={min} max={max} step={step}
         onChange={(e) => onChange(+e.target.value)}
+        inputMode="decimal"
         className="wb-input" />
     </label>
   );

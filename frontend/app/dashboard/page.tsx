@@ -23,39 +23,55 @@ export default function DashboardPage() {
   });
 
   return (
-    <div className="space-y-3">
-      {/* WeBull-style page header */}
-      <div className="flex items-center justify-between pb-1 border-b border-wb-border">
-        <h1 className="text-[13px] font-semibold text-wb-text">Dashboard</h1>
-        <span className="text-[11px] text-wb-dim num">{fmt.time(new Date().toISOString())}</span>
+    <div className="space-y-4 max-w-[1400px]">
+      {/* Page header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-[18px] font-bold text-wb-text tracking-tight">Dashboard</h1>
+          <p className="text-[12px] text-wb-muted mt-0.5">Live portfolio overview</p>
+        </div>
+        <span className="text-[12px] text-wb-dim num">{fmt.time(new Date().toISOString())}</span>
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-        <StatCard label="Portfolio Value"
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard
+          label="Portfolio Value"
           value={portfolio ? fmt.usd(portfolio.portfolio_value) : "—"}
-          delta={portfolio?.day_pnl_pct} icon={Wallet} accent="default" />
-        <StatCard label="Day P&L"
+          delta={portfolio?.day_pnl_pct}
+          icon={Wallet}
+          accent="default"
+        />
+        <StatCard
+          label="Day P&L"
           value={portfolio ? fmt.usd(portfolio.day_pnl) : "—"}
           delta={portfolio?.day_pnl_pct}
-          accent={(portfolio?.day_pnl ?? 0) >= 0 ? "pos" : "neg"} icon={DollarSign} />
-        <StatCard label="Total P&L"
+          accent={(portfolio?.day_pnl ?? 0) >= 0 ? "pos" : "neg"}
+          icon={DollarSign}
+        />
+        <StatCard
+          label="Total P&L"
           value={portfolio ? fmt.usd(portfolio.total_pnl) : "—"}
           delta={portfolio?.total_pnl_pct}
-          accent={(portfolio?.total_pnl ?? 0) >= 0 ? "pos" : "neg"} icon={Percent} />
-        <StatCard label="Buying Power"
+          accent={(portfolio?.total_pnl ?? 0) >= 0 ? "pos" : "neg"}
+          icon={Percent}
+        />
+        <StatCard
+          label="Buying Power"
           value={portfolio ? fmt.usd(portfolio.buying_power) : "—"}
-          icon={ShieldCheck} accent="default" />
+          icon={ShieldCheck}
+          accent="default"
+        />
       </div>
 
-      {/* Main content grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
-        <div className="lg:col-span-2 space-y-2">
+      {/* Main grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 space-y-4">
           <PortfolioChart data={curve} />
           <PositionsTable positions={positions ?? []} />
           <PennyScanner />
         </div>
-        <div className="space-y-2">
+        <div className="space-y-4">
           <AutoTradePanel />
           <AIInsights
             headline="Volume surge activity in small-caps"

@@ -7,111 +7,153 @@
 }
 
 html, body {
-  background: #0D1117;
-  color: #EAECEF;
+  background: #09090B;
+  color: #FAFAFA;
   min-height: 100%;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  /* Eliminate 300ms tap delay on all touch elements */
+  touch-action: manipulation;
 }
 
+/* Prevent accidental pull-to-refresh on main scroll areas */
+main { overscroll-behavior-y: contain; }
+
 @layer components {
-  /* WeBull-style flat card — replaces glass */
+  /* ── Cards ──────────────────────────────────────────────────── */
   .card {
-    @apply bg-wb-surface border border-wb-border rounded-sm shadow-card;
+    @apply bg-wb-surface border border-wb-border rounded-xl shadow-card;
   }
   .card-elevated {
-    @apply bg-wb-surface2 border border-wb-border rounded-sm shadow-card;
+    @apply bg-wb-surface2 border border-wb-border rounded-xl shadow-card;
   }
+  /* Backward compat */
+  .glass       { @apply card; }
+  .glass-strong { @apply card-elevated; }
 
-  /* Legacy glass — maps to WeBull card for backward-compat */
-  .glass {
-    @apply bg-wb-surface border border-wb-border rounded-sm shadow-card;
-  }
-  .glass-strong {
-    @apply bg-wb-surface2 border border-wb-border2 rounded-sm shadow-card;
-  }
+  /* Card with colored top accent bar */
+  .card-accent-orange { @apply card; border-top: 2px solid #F59E0B; }
+  .card-accent-green  { @apply card; border-top: 2px solid #22C55E; }
+  .card-accent-red    { @apply card; border-top: 2px solid #EF4444; }
 
-  /* Typography */
+  /* ── Typography ─────────────────────────────────────────────── */
   .num {
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
+    letter-spacing: -0.01em;
   }
-  .ink-heading {
-    @apply text-wb-text font-semibold tracking-tight;
+  .ink-heading { @apply text-wb-text font-semibold tracking-tight; }
+  .ink-soft    { @apply text-wb-muted; }
+  .ink-muted   { @apply text-wb-dim; }
+
+  /* Section label — clean, minimal */
+  .section-label {
+    @apply text-[11px] font-semibold uppercase tracking-[0.12em] text-wb-muted;
   }
-  .ink-soft  { @apply text-wb-muted; }
-  .ink-muted { @apply text-wb-dim; }
+  /* Backward compat */
+  .eyebrow         { @apply section-label; }
+  .wb-section-label { @apply section-label; }
 
-  /* Gain / loss colors */
-  .pos-text  { color: #00C076; }
-  .neg-text  { color: #F6465D; }
-  .warn-text { color: #F0A400; }
-  .pos-bg    { background-color: #001F12; }
-  .neg-bg    { background-color: #250A0D; }
-  .orange-bg { background-color: #2D2600; }
+  /* ── Status colors ──────────────────────────────────────────── */
+  .pos-text  { color: #22C55E; }
+  .neg-text  { color: #EF4444; }
+  .warn-text { color: #F59E0B; }
+  .pos-bg    { background-color: #052E16; }
+  .neg-bg    { background-color: #1F0707; }
+  .orange-bg { background-color: #1C1400; }
 
-  /* WeBull section header */
-  .wb-section-label {
-    @apply text-[10px] font-semibold uppercase tracking-[0.15em] text-wb-muted;
+  /* ── Pill badges ─────────────────────────────────────────────── */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium;
   }
+  .badge-green  { @apply badge bg-wb-green-dim text-wb-green; }
+  .badge-red    { @apply badge bg-wb-red-dim text-wb-red; }
+  .badge-orange { @apply badge bg-wb-orange-dim text-wb-orange; }
+  .badge-muted  { @apply badge bg-wb-surface3 text-wb-muted; }
 
-  /* WeBull eyebrow (backward compat) */
-  .eyebrow {
-    @apply text-[10px] font-semibold uppercase tracking-[0.15em] text-wb-muted;
-  }
-
-  /* WeBull table row */
+  /* ── Table rows ──────────────────────────────────────────────── */
   .wb-row {
-    @apply border-b border-wb-border last:border-0 hover:bg-wb-surface2 transition-colors;
+    @apply border-b border-wb-border last:border-0 hover:bg-wb-surface2/60 transition-colors duration-150;
   }
 
-  /* Buttons */
+  /* ── Buttons ─────────────────────────────────────────────────── */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-[3px] text-sm font-medium transition;
+    @apply inline-flex items-center justify-center gap-2 px-4 h-9 rounded-lg text-[13px] font-medium
+           transition-all duration-150 cursor-pointer select-none min-w-[44px];
   }
   .btn-primary {
-    @apply btn bg-wb-orange text-black font-semibold hover:brightness-110;
+    @apply btn bg-wb-orange text-black font-semibold hover:brightness-110 active:scale-[0.98];
   }
   .btn-ghost {
-    @apply btn bg-transparent text-wb-muted border border-wb-border hover:text-wb-text hover:border-wb-border2;
+    @apply btn bg-transparent text-wb-muted border border-wb-border
+           hover:text-wb-text hover:bg-wb-surface2 hover:border-wb-border2;
   }
   .btn-buy {
-    @apply btn bg-wb-green text-black font-semibold hover:brightness-110;
+    @apply btn bg-wb-green text-black font-semibold hover:brightness-110 active:scale-[0.98];
   }
   .btn-sell {
-    @apply btn bg-wb-red text-white font-semibold hover:brightness-110;
+    @apply btn bg-wb-red text-white font-semibold hover:brightness-110 active:scale-[0.98];
   }
   .btn-danger {
-    @apply btn bg-wb-red-dim text-wb-red border border-wb-red/30 hover:bg-wb-red/20;
+    @apply btn bg-wb-red-dim text-wb-red border border-wb-red/20 hover:bg-wb-red/15;
+  }
+  .btn-sm {
+    @apply h-8 px-3 text-[12px] rounded-md;
+  }
+  .btn-icon {
+    @apply inline-flex items-center justify-center w-9 h-9 rounded-lg cursor-pointer
+           text-wb-dim hover:text-wb-muted hover:bg-wb-surface2 transition-colors duration-150;
   }
 
-  /* WeBull input */
+  /* ── Inputs ──────────────────────────────────────────────────── */
   .wb-input {
-    @apply w-full px-3 py-2 bg-wb-surface2 border border-wb-border text-wb-text
-           placeholder:text-wb-dim focus:outline-none focus:border-wb-orange
-           rounded-[3px] text-sm num transition-colors;
+    @apply w-full px-3 h-10 bg-wb-surface2 border border-wb-border text-wb-text
+           placeholder:text-wb-dim focus:outline-none focus:ring-1 focus:ring-wb-orange/40
+           focus:border-wb-orange/60 rounded-lg text-[13px] num transition-all duration-150;
+  }
+  .wb-input-sm {
+    @apply wb-input h-8 text-[12px] rounded-md;
   }
 
-  /* Orange glow divider */
+  /* ── Dividers ────────────────────────────────────────────────── */
   .glow-divider {
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(240,164,0,0.35), transparent);
+    background: linear-gradient(90deg, transparent, rgba(245,158,11,0.25), transparent);
+  }
+  .divider {
+    height: 1px;
+    background: rgba(255,255,255,0.06);
   }
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #0D1117; }
-::-webkit-scrollbar-thumb { background: #2B2F36; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #363C45; }
+/* ── Thin, subtle scrollbar ─────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.16); }
 
-/* Ticker bar animation */
+/* ── Ticker bar ──────────────────────────────────────────────────── */
 .ticker-track {
   display: flex;
   white-space: nowrap;
   animation: tickerScroll 50s linear infinite;
 }
 .ticker-track:hover { animation-play-state: paused; }
+
+/* ── Focus ring for keyboard nav ────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid rgba(245,158,11,0.5);
+  outline-offset: 2px;
+}
+
+/* ── Reduced motion ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 
