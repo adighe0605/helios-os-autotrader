@@ -24,11 +24,14 @@ export async function GET(
       `/v2/stocks/${encodeURIComponent(sym)}/bars?timeframe=${timeframe}&limit=${limit}&feed=iex&sort=asc`
     );
     const bars = data?.bars ?? [];
+    if (bars.length === 0) {
+      return NextResponse.json(mockCandles(sym, limit));
+    }
     return NextResponse.json(
       bars.map((b) => ({ t: b.t, o: b.o, h: b.h, l: b.l, c: b.c, v: b.v }))
     );
   } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 502 });
+    return NextResponse.json(mockCandles(sym, limit));
   }
 }
 
