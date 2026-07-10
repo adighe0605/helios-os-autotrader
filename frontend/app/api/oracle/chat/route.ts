@@ -456,22 +456,360 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // ── K1. RSI ───────────────────────────────────────────────────────────────
+    if (matchesAny(p, ["rsi", "relative strength index", "overbought", "oversold"])) {
+      return NextResponse.json({ response:
+        `### 📊 RSI — Relative Strength Index\n\n` +
+        `**Source:** Industry Trading Knowledge\n\n` +
+        `RSI is a **momentum oscillator** that measures the speed and magnitude of recent price changes on a scale of 0–100.\n\n` +
+        `#### Key Levels\n` +
+        `| Level | Signal |\n|-------|--------|\n` +
+        `| **> 70** | Overbought — potential reversal or pullback |\n` +
+        `| **30–70** | Neutral zone — trend is intact |\n` +
+        `| **< 30** | Oversold — potential bounce or recovery |\n\n` +
+        `#### How Helios Uses RSI\n` +
+        `• **PennyMomentumAgent** uses RSI(14) on daily candles — avoids entering penny stocks above RSI 75 to prevent buying into exhaustion\n` +
+        `• **IntradayAgent** uses RSI(7) on 5-minute candles for intraday confirmation\n` +
+        `• A divergence between price making new highs and RSI declining is a bearish exit signal\n\n` +
+        `*Formula: RSI = 100 − [100 ÷ (1 + (Avg Gain / Avg Loss))]*` });
+    }
+
+    // ── K2. VWAP ─────────────────────────────────────────────────────────────
+    if (matchesAny(p, ["vwap", "volume weighted", "intraday anchor"])) {
+      return NextResponse.json({ response:
+        `### 📈 VWAP — Volume Weighted Average Price\n\n` +
+        `**Source:** Industry Trading Knowledge\n\n` +
+        `VWAP is the **average price weighted by volume** throughout the trading day. It resets at 9:30 AM ET every session.\n\n` +
+        `#### Why It Matters\n` +
+        `• Institutional traders (hedge funds, mutual funds) use VWAP as their **benchmark** — they buy below it, sell above it\n` +
+        `• Price above VWAP = **bullish intraday bias**\n` +
+        `• Price below VWAP = **bearish intraday bias**\n` +
+        `• A reclaim of VWAP after a dip is a strong long signal\n\n` +
+        `#### How Helios Uses VWAP\n` +
+        `• **IntradayAgent** checks if the stock is trading **above VWAP** at entry — a required condition for intraday longs\n` +
+        `• If a profitable position drops below VWAP during the day, it triggers an early exit review\n` +
+        `• Combined with ORB (Opening Range Breakout) for highest-confidence setups\n\n` +
+        `*VWAP is the most widely used intraday institutional benchmark.*` });
+    }
+
+    // ── K3. MACD ─────────────────────────────────────────────────────────────
+    if (matchesAny(p, ["macd", "moving average convergence", "signal line", "histogram"])) {
+      return NextResponse.json({ response:
+        `### 📊 MACD — Moving Average Convergence Divergence\n\n` +
+        `**Source:** Industry Trading Knowledge\n\n` +
+        `MACD measures the relationship between two EMAs and generates momentum signals.\n\n` +
+        `#### Components\n` +
+        `• **MACD Line** = EMA(12) − EMA(26)\n` +
+        `• **Signal Line** = EMA(9) of MACD Line\n` +
+        `• **Histogram** = MACD Line − Signal Line\n\n` +
+        `#### Signals\n` +
+        `| Signal | Meaning |\n|--------|----------|\n` +
+        `| MACD crosses **above** Signal | Bullish — potential buy |\n` +
+        `| MACD crosses **below** Signal | Bearish — potential sell |\n` +
+        `| Histogram expanding | Momentum increasing |\n` +
+        `| Histogram shrinking | Momentum fading |\n\n` +
+        `#### How Helios Uses MACD\n` +
+        `• **MomentumAgent** uses MACD bullish crossover as a blue chip entry trigger\n` +
+        `• **MeanReversionAgent** uses MACD histogram compression to identify coiled stocks\n` +
+        `• MACD bearish cross on an open position triggers a re-evaluation for early exit` });
+    }
+
+    // ── K4. BOLLINGER BANDS ───────────────────────────────────────────────────
+    if (matchesAny(p, ["bollinger", "bands", "standard deviation band", "squeeze"])) {
+      return NextResponse.json({ response:
+        `### 📊 Bollinger Bands\n\n` +
+        `**Source:** Industry Trading Knowledge\n\n` +
+        `Bollinger Bands consist of a **20-period SMA** with upper/lower bands at ±2 standard deviations.\n\n` +
+        `#### Key Concepts\n` +
+        `• **Band Squeeze** — bands narrow, volatility compressed → breakout imminent\n` +
+        `• **Band Walk** — price hugs upper band in a strong uptrend (bullish)\n` +
+        `• **Mean Reversion** — price snaps back to middle band (20 SMA) after extremes\n` +
+        `• **Upper Band Touch** — not always overbought in a trend; only bearish with RSI divergence\n\n` +
+        `#### How Helios Uses Bollinger Bands\n` +
+        `• **MeanReversionAgent** scans for stocks at the lower band with RSI < 35 for bounce plays\n` +
+        `• **PennyMomentumAgent** uses a Bollinger squeeze scan to find penny stocks about to break out\n` +
+        `• Target on mean-reversion trades is typically the **middle band (20 SMA)**` });
+    }
+
+    // ── K5. MOVING AVERAGES ───────────────────────────────────────────────────
+    if (matchesAny(p, ["moving average", "ema", "sma", "200 day", "50 day", "golden cross", "death cross", "ma ribbon"])) {
+      return NextResponse.json({ response:
+        `### 📈 Moving Averages — EMA & SMA\n\n` +
+        `**Source:** Industry Trading Knowledge\n\n` +
+        `Moving averages smooth price data to identify trend direction.\n\n` +
+        `| Type | Formula | Best For |\n|------|---------|----------|\n` +
+        `| **SMA** | Simple average of N closes | Trend identification |\n` +
+        `| **EMA** | Weighted — recent prices count more | Faster signal, less lag |\n\n` +
+        `#### Key Levels\n` +
+        `• **EMA 9/21** — short-term momentum (used for intraday)\n` +
+        `• **EMA 50** — intermediate trend; loss of 50 EMA = bearish\n` +
+        `• **SMA 200** — long-term health benchmark\n` +
+        `• **Golden Cross** — 50 SMA crosses above 200 SMA = strong bullish signal\n` +
+        `• **Death Cross** — 50 SMA crosses below 200 SMA = bearish\n\n` +
+        `#### How Helios Uses MAs\n` +
+        `• **MomentumAgent** requires price > EMA(50) on daily for blue chip entries\n` +
+        `• **PennyMomentumAgent** uses EMA(9) > EMA(21) crossover as entry trigger\n` +
+        `• **IntradayAgent** uses EMA(9) on 5m chart for intraday trend confirmation` });
+    }
+
+    // ── K6. PENNY STOCKS ─────────────────────────────────────────────────────
+    if (matchesAny(p, ["penny stock", "penny", "low float", "small cap", "micro cap", "catalyst", "dilution", "pump and dump", "float"])) {
+      return NextResponse.json({ response:
+        `### 💡 Penny Stock Trading — How It Works\n\n` +
+        `**Source:** Industry Trading Knowledge\n\n` +
+        `Penny stocks are generally shares priced **under $5** (some define it as under $1). They offer explosive upside but carry significant risk.\n\n` +
+        `#### Why Penny Stocks Move\n` +
+        `• **Catalyst** — news, FDA approval, earnings surprise, contract announcement → can spike 50-200% in one session\n` +
+        `• **Low Float** — fewer shares available = easier for volume to push the price higher\n` +
+        `• **Short Squeeze** — high short interest + catalyst = shorts forced to buy, price explodes\n\n` +
+        `#### Key Metrics to Watch\n` +
+        `| Metric | Ideal Range |\n|--------|------------|\n` +
+        `| Float | < 20M shares (lower = more volatile) |\n` +
+        `| Volume | > 3× average daily volume |\n` +
+        `| Price | $0.50 – $5.00 |\n` +
+        `| Catalyst | Fresh news today |\n` +
+        `| Short Interest | > 10% for squeeze potential |\n\n` +
+        `#### Risks\n` +
+        `• **Dilution** — companies issue new shares, tanking the price\n` +
+        `• **Pump & Dump** — coordinated buying followed by insider selling\n` +
+        `• **Wide spreads** — illiquid stocks have large bid/ask gaps\n\n` +
+        `#### How Helios Trades Penny Stocks\n` +
+        `• **70% of capital** allocated to penny stock setups\n` +
+        `• **PennyMomentumAgent** scans for high-volume, catalyst-driven movers daily\n` +
+        `• Hard stop at **-8%**, target at **+12-15%**\n` +
+        `• Position sizing is **smaller** per trade to limit downside (1-2% of portfolio per penny)` });
+    }
+
+    // ── K7. MOMENTUM TRADING ──────────────────────────────────────────────────
+    if (matchesAny(p, ["momentum", "momentum trading", "trend following", "breakout", "continuation", "bull flag", "cup and handle"])) {
+      return NextResponse.json({ response:
+        `### 🚀 Momentum Trading Strategy\n\n` +
+        `**Source:** Industry Trading Knowledge\n\n` +
+        `Momentum trading buys stocks that are **already moving up** and rides the trend — *"buy high, sell higher."*\n\n` +
+        `#### Core Logic\n` +
+        `Stocks that outperform for 3-12 months tend to **continue outperforming** in the near term (this is backed by decades of academic research — Jegadeesh & Titman, 1993).\n\n` +
+        `#### Classic Momentum Setups\n` +
+        `| Pattern | Description |\n|---------|-------------|\n` +
+        `| **Bull Flag** | Sharp spike up → brief consolidation → continuation higher |\n` +
+        `| **Cup & Handle** | Rounded base → breakout from handle = major move |\n` +
+        `| **ORB (Opening Range Breakout)** | First 15m range sets bounds — break above = long |\n` +
+        `| **Gap & Go** | Stock gaps up on news → holds gap → buy the first pullback |\n\n` +
+        `#### Key Rules\n` +
+        `• Only enter **with** the trend — never fight momentum\n` +
+        `• Volume must confirm the move (low volume breakouts often fail)\n` +
+        `• Use a **tight stop** just below the breakout level\n` +
+        `• **Let winners run** — trail your stop as price moves in your favor\n\n` +
+        `#### How Helios Uses Momentum\n` +
+        `• Both **MomentumAgent** (blue chips) and **PennyMomentumAgent** are momentum-based\n` +
+        `• Each entry requires **dual confirmation**: daily chart + 5m intraday chart alignment\n` +
+        `• Trailing stop ratchet at +3% and +5% to protect gains` });
+    }
+
+    // ── K8. MEAN REVERSION ────────────────────────────────────────────────────
+    if (matchesAny(p, ["mean reversion", "revert", "bounce", "oversold bounce", "snap back", "contrarian"])) {
+      return NextResponse.json({ response:
+        `### 🔄 Mean Reversion Strategy\n\n` +
+        `**Source:** Industry Trading Knowledge\n\n` +
+        `Mean reversion is based on the principle that stock prices **tend to return to their average** over time. What goes too far down tends to bounce back.\n\n` +
+        `#### Setup Criteria\n` +
+        `• Price is **significantly below** its 20-day SMA (2+ standard deviations)\n` +
+        `• RSI drops below 30 (oversold)\n` +
+        `• No fundamental reason for the drop (earnings, fraud, sector collapse)\n` +
+        `• Volume drying up (selling exhaustion)\n\n` +
+        `#### Trade Structure\n` +
+        `• **Entry:** At or near lower Bollinger Band with RSI divergence\n` +
+        `• **Target:** Return to 20 SMA (middle Bollinger Band)\n` +
+        `• **Stop:** Below the recent swing low\n` +
+        `• **Risk:Reward:** Typically 1:2 or better\n\n` +
+        `#### How Helios Uses Mean Reversion\n` +
+        `• **MeanReversionAgent** scans the watchlist daily for stocks at extreme lows\n` +
+        `• Works best in **range-bound / sideways markets**\n` +
+        `• Avoided on stocks in fundamental downtrends (falling revenue, guidance cuts)\n` +
+        `• Complements momentum strategy — if momentum fails, mean reversion can catch the bounce` });
+    }
+
+    // ── K9. RISK MANAGEMENT CONCEPTS ─────────────────────────────────────────
+    if (matchesAny(p, ["stop loss", "trailing stop", "position sizing", "kelly criterion", "1% rule", "2% rule", "max loss", "risk management", "risk per trade", "drawdown limit"])) {
+      return NextResponse.json({ response:
+        `### 🛡️ Risk Management — Industry Best Practices\n\n` +
+        `**Source:** Industry Trading Knowledge\n\n` +
+        `Risk management is **the single most important factor** separating profitable traders from blown accounts.\n\n` +
+        `#### The 1-2% Rule\n` +
+        `Never risk more than **1-2% of total account equity** on a single trade. On a $100,000 account:\n` +
+        `• Max risk per trade = **$1,000 – $2,000**\n` +
+        `• If stop is 5% below entry, max position = $1,000 ÷ 5% = **$20,000**\n\n` +
+        `#### Position Sizing Formula\n` +
+        `\`\`\`\nShares = (Account × Risk%) ÷ (Entry Price − Stop Price)\n\`\`\`\n\n` +
+        `#### Stop Loss Types\n` +
+        `| Type | How It Works |\n|------|-------------|\n` +
+        `| **Hard Stop** | Fixed price — exit if breached |\n` +
+        `| **Trailing Stop** | Follows price up — locks in gains |\n` +
+        `| **Time Stop** | Exit if no movement after N hours |\n` +
+        `| **ATR Stop** | Stop set at 1.5–2× Average True Range from entry |\n\n` +
+        `#### How Helios Manages Risk\n` +
+        `• Hard stop at **-8%** for penny stocks, **-5%** for blue chips\n` +
+        `• At **+3% gain**: stop moves to breakeven (zero risk trade)\n` +
+        `• At **+5% gain**: trailing stop at 50% of max gain achieved\n` +
+        `• Max **3 simultaneous positions** to avoid over-concentration\n` +
+        `• All positions **flattened at 3:40 PM ET** to avoid overnight risk` });
+    }
+
+    // ── K10. PDT RULE & MARKET MECHANICS ──────────────────────────────────────
+    if (matchesAny(p, ["pdt", "pattern day trader", "day trading rule", "25000", "$25,000", "market hours", "pre market", "after hours", "t+1", "t+2", "settlement"])) {
+      return NextResponse.json({ response:
+        `### ⚖️ Market Mechanics & PDT Rule\n\n` +
+        `**Source:** Industry Trading Knowledge\n\n` +
+        `#### Pattern Day Trader (PDT) Rule\n` +
+        `The PDT rule (FINRA Rule 4210) requires you to maintain **$25,000 minimum equity** to make more than 3 day trades in a rolling 5-business-day window.\n\n` +
+        `• A **day trade** = buying AND selling the same stock in the same session\n` +
+        `• Under $25K? You get **3 day trades per 5 days**\n` +
+        `• This applies to **margin accounts only** — cash accounts are exempt but face settlement delays\n\n` +
+        `#### Market Hours (ET)\n` +
+        `| Session | Hours | Notes |\n|---------|-------|-------|\n` +
+        `| Pre-Market | 4:00 – 9:30 AM | Low liquidity, wide spreads |\n` +
+        `| Regular Session | 9:30 AM – 4:00 PM | Highest volume & liquidity |\n` +
+        `| After-Hours | 4:00 – 8:00 PM | Earnings reactions, news |\n\n` +
+        `#### Settlement\n` +
+        `• Stocks settle **T+1** (trade date + 1 business day) since May 2024\n` +
+        `• Cash accounts: must wait for settlement before reusing proceeds\n` +
+        `• Margin accounts: can trade immediately with buying power\n\n` +
+        `#### How Helios Handles This\n` +
+        `• Paper account is **not subject to PDT** — unlimited day trades for practice\n` +
+        `• Bot is designed for accounts with **$25K+** before going live\n` +
+        `• Positions are exited before **3:40 PM** to avoid overnight gaps` });
+    }
+
+    // ── K11. ORDER TYPES ──────────────────────────────────────────────────────
+    if (matchesAny(p, ["market order", "limit order", "stop order", "stop limit", "order type", "slippage", "fill price", "good till cancel", "gtc", "day order"])) {
+      return NextResponse.json({ response:
+        `### 📋 Order Types Explained\n\n` +
+        `**Source:** Industry Trading Knowledge\n\n` +
+        `| Order Type | Execution | Use Case |\n|------------|-----------|----------|\n` +
+        `| **Market Order** | Immediately at best available price | Fast entry/exit — accepts slippage |\n` +
+        `| **Limit Order** | Only at your price or better | Precise entry — may not fill |\n` +
+        `| **Stop (Stop-Market)** | Triggers market order when price hits stop | Stop loss execution |\n` +
+        `| **Stop-Limit** | Triggers limit order when price hits stop | Avoids slippage but may not fill |\n` +
+        `| **Trailing Stop** | Stop moves up with price by a % or $ amount | Lock in profits |\n\n` +
+        `#### Slippage\n` +
+        `Slippage = difference between expected and actual fill price. Worst on:\n` +
+        `• **Market orders** on illiquid penny stocks\n` +
+        `• **Fast-moving** breakout stocks\n` +
+        `• **Pre/after-market** sessions\n\n` +
+        `#### How Helios Places Orders\n` +
+        `• **Entries**: Market orders for speed (momentum requires fast execution)\n` +
+        `• **Stops**: Monitored by the bot logic, not resting stop orders (avoids stop-hunting)\n` +
+        `• **Exits**: Market orders at EOD or on signal reversal\n` +
+        `• All orders are **day orders** — cancelled if not filled by market close` });
+    }
+
+    // ── K12. HOW THE BOT DECIDES ──────────────────────────────────────────────
+    if (matchesAny(p, ["how does the bot", "how does helios", "how do you decide", "which stock", "criteria", "bot logic", "agent logic", "selection criteria", "why this stock", "how do you pick", "trading criteria"])) {
+      return NextResponse.json({ response:
+        `### 🤖 How Helios Decides What to Trade\n\n` +
+        `**Source:** Helios Bot Strategy + Agent Knowledge\n\n` +
+        `Every trading day, Helios runs a **5-agent pipeline** to decide entries and manage positions:\n\n` +
+        `#### Step 1 — Universe Scan (9:31 AM)\n` +
+        `• **Penny (70% capital)**: PennyMomentumAgent scans ~50 penny stocks for: price $0.50–$5, volume > 3× avg, RSI 45–70, EMA(9) > EMA(21), positive catalyst\n` +
+        `• **Blue Chip (30% capital)**: MomentumAgent scans S&P 500 large caps for: price > EMA(50), MACD bullish crossover, RS rank > 70\n\n` +
+        `#### Step 2 — Dual Agent Confirmation\n` +
+        `Both penny and blue chip picks must be confirmed by **IntradayAgent** on 5-minute candles:\n` +
+        `• Price above VWAP ✓\n` +
+        `• 5m RSI > 50 ✓\n` +
+        `• No bearish divergence ✓\n\n` +
+        `#### Step 3 — Blended Confidence Score\n` +
+        `Entry only if blended score ≥ **70%** from both agents\n\n` +
+        `#### Step 4 — Active Position Management\n` +
+        `• Trailing stop ratchet: +3% → breakeven, +5% → trail at 50% of max gain\n` +
+        `• 5m re-score: if bearish while profitable → early exit\n\n` +
+        `#### Step 5 — EOD Flatten (3:40 PM)\n` +
+        `All positions closed to avoid overnight gap risk` });
+    }
+
+    // ── K13. BLUE CHIP vs PENNY ───────────────────────────────────────────────
+    if (matchesAny(p, ["blue chip", "bluechip", "large cap", "difference between", "penny vs", "vs penny", "why both", "mix of stocks", "70 30", "70/30", "allocation"])) {
+      return NextResponse.json({ response:
+        `### ⚖️ Blue Chip vs Penny Stock — Helios Strategy Mix\n\n` +
+        `**Source:** Industry Trading Knowledge + Helios Strategy\n\n` +
+        `Helios runs a **70% Penny / 30% Blue Chip** split by capital allocation.\n\n` +
+        `| Factor | Penny Stocks | Blue Chip |\n|--------|-------------|----------|\n` +
+        `| **Price Range** | $0.50 – $5 | $50 – $500+ |\n` +
+        `| **Volatility** | Very high (10-50% daily moves) | Moderate (1-5% daily) |\n` +
+        `| **Liquidity** | Low to moderate | Very high |\n` +
+        `| **Upside Potential** | 15-50%+ per trade | 3-8% per trade |\n` +
+        `| **Risk Per Trade** | Higher | Lower |\n` +
+        `| **Holding Period** | Intraday only | Intraday |\n` +
+        `| **Agents** | PennyMomentumAgent | MomentumAgent |\n\n` +
+        `#### Why This Mix?\n` +
+        `• Penny stocks provide **explosive upside** — one great penny trade can make the whole week\n` +
+        `• Blue chips provide **stability and consistency** — reduces drawdown on bad penny days\n` +
+        `• Together they create a **diversified intraday strategy** that isn't dependent on a single market regime\n\n` +
+        `#### Both Require IntradayAgent Confirmation\n` +
+        `Neither penny nor blue chip entries fire without 5m intraday signal agreement — this filter eliminates ~40% of false signals.` });
+    }
+
+    // ── K14. SHORT SELLING ────────────────────────────────────────────────────
+    if (matchesAny(p, ["short", "short sell", "short selling", "shorting", "borrow", "short squeeze", "short interest"])) {
+      return NextResponse.json({ response:
+        `### 📉 Short Selling Explained\n\n` +
+        `**Source:** Industry Trading Knowledge\n\n` +
+        `Short selling is **profiting from falling prices** — you borrow shares, sell them, then buy back cheaper.\n\n` +
+        `#### How It Works\n` +
+        `1. Borrow shares from broker\n` +
+        `2. Sell at current price (e.g. $50)\n` +
+        `3. Price drops to $40 → buy back\n` +
+        `4. Return shares to broker, keep $10/share profit\n\n` +
+        `#### Short Squeeze\n` +
+        `When a heavily shorted stock **rises sharply**, shorts are forced to buy to cover losses, pushing the price even higher. This feedback loop creates explosive moves.\n\n` +
+        `• Classic examples: GME (2021), AMC, BBBY\n` +
+        `• Penny stocks with >20% short interest are prime squeeze candidates\n` +
+        `• **Short interest ratio (Days to Cover)** = shares short ÷ avg daily volume\n\n` +
+        `#### Helios & Short Selling\n` +
+        `• **Current bot is long-only** — does not short stocks\n` +
+        `• **SentimentAgent** monitors short interest data as a **long-side catalyst indicator**\n` +
+        `• High short interest + positive news = potential long entry for a squeeze play` });
+    }
+
+    // ── K15. SENTIMENT ANALYSIS ───────────────────────────────────────────────
+    if (matchesAny(p, ["sentiment", "sentiment analysis", "news analysis", "social media", "reddit", "twitter", "wallstreetbets", "wsb", "fear greed", "market mood"])) {
+      return NextResponse.json({ response:
+        `### 💬 Sentiment Analysis in Trading\n\n` +
+        `**Source:** Industry Trading Knowledge + Helios SentimentAgent\n\n` +
+        `Sentiment analysis reads **news, social media, and market data** to gauge crowd psychology.\n\n` +
+        `#### Why It Matters\n` +
+        `Markets are driven by human emotion — fear and greed cause prices to overshoot fundamentals. Quantifying sentiment gives an **edge in timing.**\n\n` +
+        `#### Sources Helios Monitors\n` +
+        `• **Financial news** — earnings, FDA decisions, contract wins, macro events\n` +
+        `• **Short interest data** — high short = potential squeeze setup\n` +
+        `• **Market breadth** — VIX, advance/decline ratio, sector rotation\n\n` +
+        `#### Fear & Greed Indicators\n` +
+        `| Signal | Interpretation |\n|--------|---------------|\n` +
+        `| VIX > 30 | High fear — market volatile, reduce size |\n` +
+        `| VIX < 15 | Low fear — complacency, watch for reversal |\n` +
+        `| Sector rotation into defensives | Risk-off — scale back aggressive positions |\n` +
+        `| High volume on up days | Institutional accumulation — bullish |\n\n` +
+        `#### How SentimentAgent Works\n` +
+        `• Assigns a **sentiment score (0–100)** to each candidate stock\n` +
+        `• Negative news = automatic disqualifier even if technical setup is clean\n` +
+        `• High positive sentiment boosts the **blended confidence score** for entry approval` });
+    }
+
     // ── DEFAULT: HELP ─────────────────────────────────────────────────────────
     const acc = await getAccount();
     return NextResponse.json({
       response:
         `### 👋 Oracle AI — Trading Analyst\n\n` +
-        `**Source:** Alpaca Account API\n\n` +
+        `**Source:** Alpaca Account API + Industry Trading Knowledge\n\n` +
         `Your account equity is currently \`$${parseFloat(acc.equity).toLocaleString("en-US", { minimumFractionDigits: 2 })}\`.\n\n` +
-        `I can answer questions like:\n` +
-        `• *"How did I do today?"*\n` +
-        `• *"What positions are open?"*\n` +
-        `• *"What is my win rate?"*\n` +
-        `• *"How much risk am I taking?"*\n` +
-        `• *"How much can I make next month?"*\n` +
-        `• *"Show me my recent trades"*\n` +
-        `• *"What is my total ROI?"*\n` +
-        `• *"What's my account balance?"*\n\n` +
+        `#### Live Account Questions\n` +
+        `• *"How did I do today?"* · *"What positions are open?"* · *"What is my win rate?"*\n` +
+        `• *"How much risk am I taking?"* · *"Show me my recent trades"* · *"What is my total ROI?"*\n\n` +
+        `#### Strategy & Knowledge Questions\n` +
+        `• *"How does the bot decide what to trade?"*\n` +
+        `• *"What is RSI / VWAP / MACD / Bollinger Bands?"*\n` +
+        `• *"What is momentum trading / mean reversion?"*\n` +
+        `• *"Explain penny stocks / blue chips / short selling"*\n` +
+        `• *"How do trailing stops work?"*\n` +
+        `• *"What is the PDT rule?"*\n\n` +
         `What would you like to know?`,
     });
   } catch (err: any) {
