@@ -11,18 +11,23 @@ type Message = {
 };
 
 const SUGGESTED_PROMPTS = [
+  "Analyze SNDL — what do the agents say?",
+  "What stocks should I trade today?",
+  "Why are we holding open positions?",
   "How much money did I make today?",
-  "What trades are currently open?",
-  "How much risk am I currently taking?",
   "What is my win rate?",
-  "How much can I make next month?"
+  "Intraday signal on AAPL?",
+  "Should I buy TSLA?",
+  "How much risk am I currently taking?",
 ];
 
 export default function OraclePage() {
+  const WELCOME = "Hello! I am **Oracle AI** — powered by the same AI agents that run your trading bot.\n\nI can answer questions using **real agent signals** (PennyMomentumAgent · MeanReversionAgent · SentimentAgent · RiskAgent · IntradayAgent):\n\n• *\"Analyze SNDL\"* — runs the full agent debate\n• *\"What stocks should I trade?\"* — live penny + blue chip scan\n• *\"Why are we holding TSLA?\"* — agent re-evaluation of open positions\n• *\"Intraday signal on NVDA?\"* — 5m VWAP/ORB check\n• *\"How much did I make today?\"* — live account data\n\nAsk me anything!";
+
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hello! I am **Oracle AI**, your personal trading performance analyst. I can answer complex questions about your active open positions, daily returns, custom profit forecasting, or active risk limits. Ask me anything in natural language!"
+      content: WELCOME,
     }
   ]);
   const [input, setInput] = useState("");
@@ -69,7 +74,7 @@ export default function OraclePage() {
     setMessages([
       {
         role: "assistant",
-        content: "Hello! I am **Oracle AI**, your personal trading performance analyst. I can answer complex questions about your active open positions, daily returns, custom profit forecasting, or active risk limits. Ask me anything in natural language!"
+        content: WELCOME,
       }
     ]);
   }
@@ -191,7 +196,7 @@ export default function OraclePage() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask Oracle about ROI, risk, daily trades, P&L, forecast..."
+              placeholder="Ask Oracle: 'Analyze SNDL', 'top picks today', 'why holding TSLA?', 'intraday signal on AAPL'..."
               className="flex-1 px-4 h-10 bg-wb-surface border border-wb-border text-wb-text placeholder:text-wb-dim focus:outline-none focus:ring-1 focus:ring-wb-orange/40 focus:border-wb-orange/60 rounded-xl text-[13px] transition-all"
               disabled={loading}
             />

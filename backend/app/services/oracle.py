@@ -1,7 +1,8 @@
 """Oracle AI Service.
 
 Provides analytical tools and conversational capability for the personal trading analyst.
-Integrates with active brokers (Alpaca or Paper) and risk management to answer questions.
+Integrates with active brokers (Alpaca or Paper), risk management, AND the full AI agent
+debate engine to answer questions about stock analysis, signals, and reasoning.
 """
 from __future__ import annotations
 
@@ -271,21 +272,326 @@ def calculate_risk_metrics() -> dict[str, Any]:
     }
 
 
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 🤖 AI AGENT TOOLS — Use the actual trading agents as Oracle's brain
+# ──────────────────────────────────────────────────────────────────────────────
+
+def analyze_symbol_with_agents(symbol: str) -> dict[str, Any]:
+    """Run the full multi-agent debate engine on a symbol and return each agent's signal + final verdict.
+    
+    Uses: PennyMomentumAgent, MeanReversionAgent, SentimentAgent, RiskAgent, PortfolioManagerAgent.
+    The DebateEngine synthesizes their signals into a single trade decision with confidence.
+    """
+    try:
+        from app.agents.base import AgentContext
+        from app.agents.debate import DebateEngine
+        from app.agents.mean_reversion import MeanReversionAgent
+        from app.agents.momentum import MomentumAgent
+        from app.agents.penny_momentum import PennyMomentumAgent
+        from app.agents.risk_agent import RiskAgent
+        from app.agents.sentiment import SentimentAgent
+        from app.services.market_data import get_market_data
+
+        symbol = symbol.upper().strip()
+        md = get_market_data()
+        b = get_broker()
+
+        candles = md.candles_df(symbol, tf="1d", limit=300)
+        if candles.empty or len(candles) < 20:
+            return {"error": f"Insufficient market data for {symbol}"}
+
+        price = float(candles["c"].iloc[-1])
+        try:
+            news = md.news(symbol, limit=5)
+            news_summary = "  ".join(n.headline for n in news)
+        except Exception:
+            news_summary = ""
+
+        ctx = AgentContext(
+            symbol=symbol,
+            candles=candles,
+            quote_price=price,
+            news_summary=news_summary,
+        )
+
+        # Determine engine type based on price
+        is_penny = price < 5.0
+        if is_penny:
+            engine = DebateEngine(agents=[
+                PennyMomentumAgent(),
+                MeanReversionAgent(),
+                SentimentAgent(),
+                RiskAgent(),
+            ])
+        else:
+            engine = DebateEngine(agents=[
+                MomentumAgent(),
+                MeanReversionAgent(),
+                SentimentAgent(),
+                RiskAgent(),
+            ])
+
+        decision = engine.decide(ctx)
+
+        agent_signals = []
+        for sig in decision.signals:
+            agent_signals.append({
+                "agent": sig.agent,
+                "verdict": sig.verdict,
+                "confidence": round(sig.confidence, 3),
+                "reasoning": sig.reasoning,
+                "indicators": sig.indicators,
+            })
+
+        return {
+            "symbol": symbol,
+            "current_price": round(price, 4),
+            "stock_type": "penny" if is_penny else "blue_chip",
+            "final_verdict": decision.verdict,
+            "final_confidence": round(decision.confidence, 3),
+            "summary": decision.summary,
+            "stop_loss": round(decision.stop_loss, 4) if decision.stop_loss else None,
+            "take_profit": round(decision.take_profit, 4) if decision.take_profit else None,
+            "risk_reward": decision.risk_reward,
+            "agent_signals": agent_signals,
+            "news_catalyst": news_summary[:200] if news_summary else "No recent news",
+        }
+    except Exception as e:
+        return {"error": f"Agent analysis failed for {symbol}: {str(e)}"}
+
+
+def get_intraday_signal(symbol: str) -> dict[str, Any]:
+    """Run the IntradayAgent on 5-minute candles for a symbol.
+    
+    Uses VWAP, Opening Range Breakout (ORB), 5m RSI, volume surge, SMA20, and fade signals.
+    Best for answering questions about short-term intraday momentum.
+    """
+    try:
+        from app.agents.base import AgentContext
+        from app.agents.intraday import IntradayAgent
+        from app.services.market_data import get_market_data
+
+        symbol = symbol.upper().strip()
+        md = get_market_data()
+
+        candles_5m = md.candles_df(symbol, tf="5m", limit=78)
+        if candles_5m.empty or len(candles_5m) < 6:
+            return {"error": f"Insufficient 5m candle data for {symbol} (market may be closed)"}
+
+        price = float(candles_5m["c"].iloc[-1])
+        ctx = AgentContext(symbol=symbol, candles=candles_5m, quote_price=price)
+
+        agent = IntradayAgent()
+        signal = agent.evaluate(ctx)
+
+        return {
+            "symbol": symbol,
+            "current_price": round(price, 4),
+            "intraday_verdict": signal.verdict,
+            "intraday_confidence": round(signal.confidence, 3),
+            "reasoning": signal.reasoning,
+            "signals": signal.indicators,
+            "candle_count": len(candles_5m),
+            "timeframe": "5m",
+        }
+    except Exception as e:
+        return {"error": f"Intraday signal failed for {symbol}: {str(e)}"}
+
+
+def explain_open_positions() -> list[dict[str, Any]]:
+    """For each open position, run the AI agents and explain WHY we're holding it,
+    what the current signal says, and whether agents recommend holding or exiting.
+    
+    Combines live broker position data with real-time agent evaluation.
+    """
+    try:
+        from app.agents.base import AgentContext
+        from app.agents.debate import DebateEngine
+        from app.agents.mean_reversion import MeanReversionAgent
+        from app.agents.momentum import MomentumAgent
+        from app.agents.penny_momentum import PennyMomentumAgent
+        from app.agents.risk_agent import RiskAgent
+        from app.agents.sentiment import SentimentAgent
+        from app.services.market_data import get_market_data
+
+        b = get_broker()
+        md = get_market_data()
+        positions = b.positions()
+
+        if not positions:
+            return [{"message": "No open positions. All capital is in cash."}]
+
+        result = []
+        for pos in positions:
+            symbol = pos.symbol
+            try:
+                candles = md.candles_df(symbol, tf="1d", limit=100)
+                if candles.empty or len(candles) < 10:
+                    result.append({"symbol": symbol, "error": "Insufficient data"})
+                    continue
+
+                price = pos.current_price
+                is_penny = price < 5.0
+                try:
+                    news = md.news(symbol, limit=3)
+                    news_summary = "  ".join(n.headline for n in news)
+                except Exception:
+                    news_summary = ""
+
+                ctx = AgentContext(
+                    symbol=symbol,
+                    candles=candles,
+                    quote_price=price,
+                    news_summary=news_summary,
+                )
+
+                agents_list = [PennyMomentumAgent(), MeanReversionAgent(), SentimentAgent(), RiskAgent()] \
+                    if is_penny else [MomentumAgent(), MeanReversionAgent(), SentimentAgent(), RiskAgent()]
+                engine = DebateEngine(agents=agents_list)
+                decision = engine.decide(ctx)
+
+                pnl = pos.unrealized_pnl
+                pnl_pct = pos.unrealized_pnl_pct
+
+                result.append({
+                    "symbol": symbol,
+                    "qty": pos.qty,
+                    "entry_price": round(pos.avg_entry_price, 4),
+                    "current_price": round(price, 4),
+                    "unrealized_pnl": round(pnl, 2),
+                    "unrealized_pnl_pct": round(pnl_pct, 2),
+                    "market_value": round(pos.market_value, 2),
+                    "stock_type": "penny" if is_penny else "blue_chip",
+                    "agent_verdict": decision.verdict,
+                    "agent_confidence": round(decision.confidence, 3),
+                    "agent_summary": decision.summary,
+                    "recommendation": (
+                        "HOLD — agents still bullish" if decision.verdict == "buy" else
+                        "CONSIDER EXIT — agents turned bearish" if decision.verdict == "sell" else
+                        "NEUTRAL — monitor closely"
+                    ),
+                })
+            except Exception as e:
+                result.append({"symbol": symbol, "error": str(e)})
+
+        return result
+    except Exception as e:
+        return [{"error": f"Position explanation failed: {str(e)}"}]
+
+
+def scan_top_picks(stock_type: str = "both") -> dict[str, Any]:
+    """Scan the penny + blue chip universes using AI agents and return the top scored picks.
+    
+    Args:
+        stock_type: 'penny', 'bluechip', or 'both'
+    
+    Runs PennyMomentumAgent on penny universe, MomentumAgent on blue chips.
+    Returns ranked candidates with agent verdicts for Oracle to explain.
+    """
+    try:
+        from app.agents.base import AgentContext
+        from app.agents.mean_reversion import MeanReversionAgent
+        from app.agents.momentum import MomentumAgent
+        from app.agents.penny_momentum import PennyMomentumAgent
+        from app.agents.risk_agent import RiskAgent
+        from app.services.market_data import get_market_data
+
+        md = get_market_data()
+        results: dict[str, list] = {"penny": [], "bluechip": []}
+
+        # Penny universe (top 20 for speed)
+        if stock_type in ("penny", "both"):
+            PENNY_UNIVERSE = [
+                "SNDL", "CLOV", "OCGN", "CTRM", "ZOM", "SENS", "IDEX",
+                "EXPR", "WKHS", "PLUG", "FCEL", "AMC", "MVIS", "FFIE",
+                "MULN", "NKLA", "GOEV", "HIMS", "BGFV", "HYMC",
+            ]
+            penny_agent = PennyMomentumAgent()
+            for sym in PENNY_UNIVERSE:
+                try:
+                    df = md.candles_df(sym, tf="1d", limit=100)
+                    if df.empty or len(df) < 20:
+                        continue
+                    price = float(df["c"].iloc[-1])
+                    if price > 5.0 or price < 0.10:
+                        continue
+                    ctx = AgentContext(symbol=sym, candles=df, quote_price=price)
+                    sig = penny_agent.evaluate(ctx)
+                    if sig.verdict in ("buy",):
+                        results["penny"].append({
+                            "symbol": sym,
+                            "price": round(price, 4),
+                            "verdict": sig.verdict,
+                            "confidence": round(sig.confidence, 3),
+                            "reasoning": sig.reasoning[:120],
+                        })
+                except Exception:
+                    continue
+            results["penny"].sort(key=lambda x: x["confidence"], reverse=True)
+            results["penny"] = results["penny"][:5]
+
+        # Blue chip universe (top 15 for speed)
+        if stock_type in ("bluechip", "both"):
+            BLUECHIP_UNIVERSE = [
+                "AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META",
+                "TSLA", "JPM", "BAC", "XOM", "JNJ", "UNH", "V", "PG", "HD",
+            ]
+            bc_agent = MomentumAgent()
+            for sym in BLUECHIP_UNIVERSE:
+                try:
+                    df = md.candles_df(sym, tf="1d", limit=100)
+                    if df.empty or len(df) < 20:
+                        continue
+                    price = float(df["c"].iloc[-1])
+                    ctx = AgentContext(symbol=sym, candles=df, quote_price=price)
+                    sig = bc_agent.evaluate(ctx)
+                    if sig.verdict in ("buy",):
+                        results["bluechip"].append({
+                            "symbol": sym,
+                            "price": round(price, 2),
+                            "verdict": sig.verdict,
+                            "confidence": round(sig.confidence, 3),
+                            "reasoning": sig.reasoning[:120],
+                        })
+                except Exception:
+                    continue
+            results["bluechip"].sort(key=lambda x: x["confidence"], reverse=True)
+            results["bluechip"] = results["bluechip"][:5]
+
+        return {
+            "scanned_at": datetime.now(timezone.utc).isoformat(),
+            "penny_picks": results["penny"],
+            "bluechip_picks": results["bluechip"],
+            "total_buys_found": len(results["penny"]) + len(results["bluechip"]),
+        }
+    except Exception as e:
+        return {"error": f"Scan failed: {str(e)}"}
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 # 💬 ORACLE LLM CONVERSATIONAL WRAPPER
 # ──────────────────────────────────────────────────────────────────────────────
 
-_SYSTEM_PROMPT = """You are Oracle AI, the highly intelligent Trading Performance Assistant and Analyst for Helios.
-Your goal is to help traders understand their financial metrics, perform real-time forecasting, extract transaction history, and suggest risk management adjustments in a friendly, conversational tone.
+_SYSTEM_PROMPT = """You are Oracle AI, the intelligent Trading Performance Analyst for Helios — a fully autonomous AI trading bot.
+
+You have two types of tools available:
+1. **Account tools**: Live portfolio data, P&L, positions, trade history from Alpaca
+2. **AI Agent tools**: The same AI agents that power the trading bot itself — PennyMomentumAgent, MeanReversionAgent, MomentumAgent, SentimentAgent, RiskAgent, IntradayAgent — all accessible through analyze_symbol_with_agents, get_intraday_signal, explain_open_positions, and scan_top_picks
+
+When a user asks about a specific stock (e.g., "what about AAPL?", "should I buy SNDL?", "why are you holding X?"), ALWAYS call the relevant agent tool to get the actual AI agent verdict — don't guess.
 
 Rules:
-1. Always state the data sources you used to compile your response (e.g. "Sourced from: Alpaca Account API").
-2. NEVER invent financial statistics. If data is not available, clearly state that.
-3. Never make unauthorized trades.
-4. Separate historical facts from projections clearly.
-5. Provide actionable insights (e.g., highlighting concentration risk, overtrading, or strong performance periods).
-6. Be conversational, structured, and easy to read. Use bullet points and numbers where appropriate.
-7. Use the tools provided when requested to look up exact details.
+1. State your data source (e.g., "Source: PennyMomentumAgent + MeanReversionAgent debate")
+2. NEVER invent financial statistics. Use the tools — they give real signals.
+3. Never place trades. Analysis only.
+4. Separate historical facts from AI agent projections.
+5. When agents disagree, explain each agent's reasoning and why the committee reached its verdict.
+6. Be conversational, structured, and easy to read. Use bullet points.
+7. For "which stocks should I trade?" questions → use scan_top_picks.
+8. For "why are we holding X?" → use explain_open_positions.
+9. For "what does the bot think about X?" or "analyze X" → use analyze_symbol_with_agents.
+10. For "intraday signal on X?" or "is X trending now?" → use get_intraday_signal.
 """
 
 
@@ -345,7 +651,74 @@ def run_oracle_query(prompt: str, history: Optional[list[dict[str, str]]] = None
                     "name": "calculate_risk_metrics",
                     "description": "Calculate critical risk control numbers such as total exposure and active limits.",
                     "input_schema": {"type": "object", "properties": {}}
-                }
+                },
+                # ── AI Agent tools ──────────────────────────────────────────
+                {
+                    "name": "analyze_symbol_with_agents",
+                    "description": (
+                        "Run the full multi-agent trading debate engine on a specific stock symbol. "
+                        "Uses PennyMomentumAgent, MeanReversionAgent, MomentumAgent, SentimentAgent, "
+                        "and RiskAgent to produce a buy/sell/hold verdict with confidence and per-agent reasoning. "
+                        "Call this when user asks about a specific stock, 'what does the bot think about X?', "
+                        "'should I buy X?', or 'analyze X'."
+                    ),
+                    "input_schema": {
+                        "type": "object",
+                        "properties": {
+                            "symbol": {
+                                "type": "string",
+                                "description": "Stock ticker symbol (e.g. 'SNDL', 'AAPL', 'TSLA')"
+                            }
+                        },
+                        "required": ["symbol"]
+                    }
+                },
+                {
+                    "name": "get_intraday_signal",
+                    "description": (
+                        "Run IntradayAgent on 5-minute candles for a symbol to get the current intraday momentum signal. "
+                        "Checks VWAP, Opening Range Breakout (ORB), 5m RSI, volume surge, and SMA20. "
+                        "Call this for 'is X trending right now?', 'intraday signal on X', 'should I enter X today?'"
+                    ),
+                    "input_schema": {
+                        "type": "object",
+                        "properties": {
+                            "symbol": {
+                                "type": "string",
+                                "description": "Stock ticker symbol (e.g. 'SNDL', 'AAPL')"
+                            }
+                        },
+                        "required": ["symbol"]
+                    }
+                },
+                {
+                    "name": "explain_open_positions",
+                    "description": (
+                        "For each currently open position, run AI agents and explain why the bot is holding it. "
+                        "Shows each position's entry price, unrealized P&L, AND the current agent verdict "
+                        "(still buy/hold/sell). Use for 'why are we holding X?', 'should I exit any positions?', "
+                        "'explain my portfolio'."
+                    ),
+                    "input_schema": {"type": "object", "properties": {}}
+                },
+                {
+                    "name": "scan_top_picks",
+                    "description": (
+                        "Scan the penny stock and blue chip universes using AI agents to find the top trading picks right now. "
+                        "Returns ranked candidates with agent buy signals. "
+                        "Use for 'what stocks should the bot trade?', 'top picks today', 'best penny stocks right now'."
+                    ),
+                    "input_schema": {
+                        "type": "object",
+                        "properties": {
+                            "stock_type": {
+                                "type": "string",
+                                "enum": ["penny", "bluechip", "both"],
+                                "description": "Which universe to scan. Default: 'both'"
+                            }
+                        }
+                    }
+                },
             ]
             
             # Map history into Anthropic structure
@@ -405,6 +778,18 @@ def run_oracle_query(prompt: str, history: Optional[list[dict[str, str]]] = None
                         res_val = analyze_strategy_performance()
                     elif tool_name == "calculate_risk_metrics":
                         res_val = calculate_risk_metrics()
+                    # ── AI Agent tools ──────────────────────────────────────
+                    elif tool_name == "analyze_symbol_with_agents":
+                        symbol = call.input.get("symbol", "")
+                        res_val = analyze_symbol_with_agents(symbol)
+                    elif tool_name == "get_intraday_signal":
+                        symbol = call.input.get("symbol", "")
+                        res_val = get_intraday_signal(symbol)
+                    elif tool_name == "explain_open_positions":
+                        res_val = explain_open_positions()
+                    elif tool_name == "scan_top_picks":
+                        stock_type = call.input.get("stock_type", "both")
+                        res_val = scan_top_picks(stock_type)
                         
                     tool_msg_content.append({
                         "type": "tool_result",
@@ -433,8 +818,73 @@ def run_oracle_query(prompt: str, history: Optional[list[dict[str, str]]] = None
     # 🧠 INTUITIVE HEURISTIC CONVERSATIONAL FALLBACK
     # ──────────────────────────────────────────────────────────────────────────
     normalized = prompt.lower()
-    
-    # 1. Daily Performance / ROI / Money Today
+
+    # 0. AI Agent analysis — specific ticker mentioned
+    import re as _re
+    ticker_match = _re.search(r'\b([A-Z]{1,5})\b', prompt.upper())
+    has_agent_keywords = any(k in normalized for k in [
+        "analyze", "analyse", "signal", "buy", "should i", "what do you think",
+        "intraday", "holding", "why", "vwap", "momentum", "think about"
+    ])
+    if ticker_match and has_agent_keywords:
+        sym = ticker_match.group(1)
+        if sym not in {"I", "A", "AI", "OR", "DO", "IT", "IS", "IN", "AT", "ON"}:
+            data = analyze_symbol_with_agents(sym)
+            if "error" not in data:
+                sigs = "\n".join([
+                    f"• **{s['agent']}**: {s['verdict'].upper()} ({s['confidence']:.0%}) — {s['reasoning'][:100]}"
+                    for s in data.get("agent_signals", [])
+                ])
+                return (
+                    f"### 🤖 AI Agent Analysis — {sym}\n\n"
+                    f"**Source:** Multi-Agent Debate Engine (PennyMomentumAgent · MeanReversionAgent · SentimentAgent · RiskAgent)\n\n"
+                    f"**Current Price:** `${data['current_price']}` | **Type:** {data['stock_type'].replace('_', ' ').title()}\n\n"
+                    f"#### Committee Verdict: {data['final_verdict'].upper()} — {data['final_confidence']:.0%} confidence\n\n"
+                    f"**Individual Agent Signals:**\n{sigs}\n\n"
+                    f"**Summary:** {data['summary']}\n\n"
+                    + (f"**Suggested Entry:** Stop `${data['stop_loss']}` → Target `${data['take_profit']}` (R:R {data['risk_reward']})\n" if data.get('stop_loss') else "")
+                    + (f"\n**News:** _{data['news_catalyst']}_" if data.get('news_catalyst') and data['news_catalyst'] != "No recent news" else "")
+                )
+
+    # 1. Scan top picks
+    if any(k in normalized for k in ["top picks", "what should i trade", "best stocks", "what to buy", "scan", "penny picks", "blue chip picks"]):
+        data = scan_top_picks("both")
+        if "error" not in data:
+            penny_list = "\n".join([
+                f"  • **{p['symbol']}** @ `${p['price']}` — {p['verdict'].upper()} {p['confidence']:.0%} — _{p['reasoning'][:80]}_"
+                for p in data["penny_picks"]
+            ]) or "  _No qualifying penny setups right now_"
+            bc_list = "\n".join([
+                f"  • **{p['symbol']}** @ `${p['price']}` — {p['verdict'].upper()} {p['confidence']:.0%} — _{p['reasoning'][:80]}_"
+                for p in data["bluechip_picks"]
+            ]) or "  _No qualifying blue chip setups right now_"
+            return (
+                f"### 🔍 AI Agent Top Picks\n\n"
+                f"**Source:** PennyMomentumAgent · MomentumAgent live scan\n\n"
+                f"#### 💸 Penny Stocks ({len(data['penny_picks'])} buy signals)\n{penny_list}\n\n"
+                f"#### 🏦 Blue Chips ({len(data['bluechip_picks'])} buy signals)\n{bc_list}\n\n"
+                f"_Scanned at {data['scanned_at'][:16]} UTC_"
+            )
+
+    # 2. Explain open positions
+    if any(k in normalized for k in ["why holding", "explain position", "should i exit", "explain portfolio", "open position"]):
+        positions = explain_open_positions()
+        if positions and "message" not in positions[0] and "error" not in positions[0]:
+            pos_lines = []
+            for p in positions:
+                pnl_sign = "+" if p.get("unrealized_pnl", 0) >= 0 else ""
+                pos_lines.append(
+                    f"• **{p['symbol']}** × {p['qty']} | Entry `${p['entry_price']}` → Now `${p['current_price']}` "
+                    f"| P&L `{pnl_sign}${p['unrealized_pnl']}` ({pnl_sign}{p['unrealized_pnl_pct']}%)\n"
+                    f"  → Agent says: **{p['agent_verdict'].upper()}** ({p['agent_confidence']:.0%}) — {p['recommendation']}"
+                )
+            return (
+                f"### 💼 Open Positions — Agent Analysis\n\n"
+                f"**Source:** Alpaca Positions API + AI Agent Evaluation\n\n"
+                + "\n\n".join(pos_lines)
+            )
+
+    # 3. Daily Performance / ROI / Money Today
     if any(k in normalized for k in ["today", "make today", "do today", "how did i do"]):
         data = get_daily_profit()
         pnl = data["day_pnl"]
@@ -553,14 +1003,21 @@ def run_oracle_query(prompt: str, history: Optional[list[dict[str, str]]] = None
 
     # Default fallback
     return (
-        f"Hi there! I am **Oracle AI**, your personal trading assistant. I have access to your live "
-        f"Alpaca or Paper portfolio, open positions, order book, and risk bounds.\n\n"
-        f"You can ask me questions such as:\n"
-        f"• *'How did I do today?'*\n"
-        f"• *'What is my win rate?'*\n"
-        f"• *'How much can I make next month?'*\n"
-        f"• *'What positions are currently open?'*\n"
-        f"• *'How much risk am I taking?'*\n"
-        f"• *'Which strategy is performing best?'*\n\n"
-        f"How can I assist your analysis today?"
+        f"### 👋 Oracle AI — Trading Analyst\n\n"
+        f"**Source:** Alpaca Account API + AI Trading Agents\n\n"
+        f"I reference the same AI agents that power your trading bot to answer questions:\n\n"
+        f"**📊 Performance Questions:**\n"
+        f"• *\"How did I do today?\"*\n"
+        f"• *\"What is my win rate?\"*\n"
+        f"• *\"How much can I make next month?\"*\n\n"
+        f"**🤖 AI Agent Questions:**\n"
+        f"• *\"Analyze SNDL\"* — runs full agent debate\n"
+        f"• *\"Should I buy AAPL?\"* — MomentumAgent + committee verdict\n"
+        f"• *\"What stocks should I trade?\"* — live penny + blue chip scan\n"
+        f"• *\"Why are we holding TSLA?\"* — agent re-evaluation of open positions\n"
+        f"• *\"Intraday signal on NVDA?\"* — 5m VWAP/ORB check\n\n"
+        f"**💼 Portfolio Questions:**\n"
+        f"• *\"What positions are open?\"*\n"
+        f"• *\"How much risk am I taking?\"*\n\n"
+        f"What would you like to know?"
     )
