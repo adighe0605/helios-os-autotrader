@@ -1,0 +1,32 @@
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# node
+node_modules/
+.next/
+out/
+.vercel/
+
+# editors
+.idea/
+.vscode/
+*.swp
+
+# data
+*.sqlite3
+data/
+backtest-results/

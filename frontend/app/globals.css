@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html, body {
+  background: #0D1117;
+  color: #EAECEF;
+  min-height: 100%;
+}
+
+body {
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+@layer components {
+  /* WeBull-style flat card — replaces glass */
+  .card {
+    @apply bg-wb-surface border border-wb-border rounded-sm shadow-card;
+  }
+  .card-elevated {
+    @apply bg-wb-surface2 border border-wb-border rounded-sm shadow-card;
+  }
+
+  /* Legacy glass — maps to WeBull card for backward-compat */
+  .glass {
+    @apply bg-wb-surface border border-wb-border rounded-sm shadow-card;
+  }
+  .glass-strong {
+    @apply bg-wb-surface2 border border-wb-border2 rounded-sm shadow-card;
+  }
+
+  /* Typography */
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+  .ink-heading {
+    @apply text-wb-text font-semibold tracking-tight;
+  }
+  .ink-soft  { @apply text-wb-muted; }
+  .ink-muted { @apply text-wb-dim; }
+
+  /* Gain / loss colors */
+  .pos-text  { color: #00C076; }
+  .neg-text  { color: #F6465D; }
+  .warn-text { color: #F0A400; }
+  .pos-bg    { background-color: #001F12; }
+  .neg-bg    { background-color: #250A0D; }
+  .orange-bg { background-color: #2D2600; }
+
+  /* WeBull section header */
+  .wb-section-label {
+    @apply text-[10px] font-semibold uppercase tracking-[0.15em] text-wb-muted;
+  }
+
+  /* WeBull eyebrow (backward compat) */
+  .eyebrow {
+    @apply text-[10px] font-semibold uppercase tracking-[0.15em] text-wb-muted;
+  }
+
+  /* WeBull table row */
+  .wb-row {
+    @apply border-b border-wb-border last:border-0 hover:bg-wb-surface2 transition-colors;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-[3px] text-sm font-medium transition;
+  }
+  .btn-primary {
+    @apply btn bg-wb-orange text-black font-semibold hover:brightness-110;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-wb-muted border border-wb-border hover:text-wb-text hover:border-wb-border2;
+  }
+  .btn-buy {
+    @apply btn bg-wb-green text-black font-semibold hover:brightness-110;
+  }
+  .btn-sell {
+    @apply btn bg-wb-red text-white font-semibold hover:brightness-110;
+  }
+  .btn-danger {
+    @apply btn bg-wb-red-dim text-wb-red border border-wb-red/30 hover:bg-wb-red/20;
+  }
+
+  /* WeBull input */
+  .wb-input {
+    @apply w-full px-3 py-2 bg-wb-surface2 border border-wb-border text-wb-text
+           placeholder:text-wb-dim focus:outline-none focus:border-wb-orange
+           rounded-[3px] text-sm num transition-colors;
+  }
+
+  /* Orange glow divider */
+  .glow-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(240,164,0,0.35), transparent);
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0D1117; }
+::-webkit-scrollbar-thumb { background: #2B2F36; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #363C45; }
+
+/* Ticker bar animation */
+.ticker-track {
+  display: flex;
+  white-space: nowrap;
+  animation: tickerScroll 50s linear infinite;
+}
+.ticker-track:hover { animation-play-state: paused; }
+
