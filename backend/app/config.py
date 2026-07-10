@@ -14,11 +14,8 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     SECRET_KEY: str = "change-me"
 
-    # DB / Redis
-    DATABASE_URL: str = "postgresql+psycopg://aitrader:aitrader@db:5432/aitrader"
-    REDIS_URL: str = "redis://redis:6379/0"
-    CELERY_BROKER_URL: str = "redis://redis:6379/1"
-    CELERY_RESULT_BACKEND: str = "redis://redis:6379/2"
+    # DB (Supabase PostgreSQL — set DATABASE_URL in env)
+    DATABASE_URL: str = "sqlite:///./aitrader.db"  # SQLite fallback for local dev
 
     # Auth
     JWT_SECRET: str = "change-me-jwt"

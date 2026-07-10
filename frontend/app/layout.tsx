@@ -1,6 +1,20 @@
 import type { Metadata, Viewport } from "next";
+import { Inter, Fira_Code } from "next/font/google";
 import "./globals.css";
 import { Shell } from "@/components/Shell";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const firaCode = Fira_Code({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-fira-code",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Helios AI Trader",
@@ -9,14 +23,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0D1117",
+  themeColor: "#09090F",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className={`dark ${inter.variable} ${firaCode.variable}`}>
       <body className="min-h-screen text-wb-text antialiased bg-wb-bg">
         <Shell>{children}</Shell>
       </body>

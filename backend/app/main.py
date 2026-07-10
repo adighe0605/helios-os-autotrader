@@ -8,23 +8,35 @@ from app.config import settings
 from app.db import Base, engine
 from app.routes import agents, auth, backtest, market, orders, portfolio, risk, ws
 from app.routes.auto_trade import router as auto_trade_router
+from app.workers.celery_app import scheduler, setup_scheduler
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Starting AI Trader in {mode} mode", mode=settings.TRADING_MODE)
+    logger.info("Starting AI Trader — mode={mode} env={env}", mode=settings.TRADING_MODE, env=settings.ENVIRONMENT)
+
+    # DB tables
     try:
         Base.metadata.create_all(bind=engine)
     except Exception as e:
         logger.warning("DB create_all skipped: {e}", e=e)
+
+    # Start background scheduler (replaces Celery+Redis)
+    setup_scheduler()
+    scheduler.start()
+    logger.info("APScheduler started — {n} jobs registered", n=len(scheduler.get_jobs()))
+
     yield
+
+    # Graceful shutdown
+    scheduler.shutdown(wait=False)
     logger.info("Shutting down")
 
 
 app = FastAPI(
-    title="AI Trader",
-    version="0.1.0",
-    description="Autonomous AI-powered trading platform — multi-agent + Alpaca",
+    title="Helios AI Trader",
+    version="1.0.0",
+    description="Autonomous AI-powered trading — multi-agent debate + Alpaca broker",
     lifespan=lifespan,
 )
 
@@ -45,6 +57,7 @@ def health() -> dict:
         and settings.ALPACA_API_SECRET_KEY != "YOUR_ALPACA_PAPER_SECRET_HERE"
     )
     alpaca_mode = "paper" if "paper" in settings.ALPACA_BASE_URL else "live"
+    jobs = [j.id for j in scheduler.get_jobs()]
     return {
         "ok": True,
         "mode": settings.TRADING_MODE,
@@ -52,6 +65,8 @@ def health() -> dict:
         "alpaca_connected": has_alpaca_keys,
         "alpaca_mode": alpaca_mode if has_alpaca_keys else "disconnected",
         "data_source": "alpaca" if has_alpaca_keys else "yfinance/mock",
+        "scheduler_running": scheduler.running,
+        "scheduled_jobs": jobs,
     }
 
 

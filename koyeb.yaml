@@ -1,0 +1,24 @@
+name: helios-ai-trader
+
+services:
+  - name: api
+    type: web
+    instance_type: free
+    build:
+      type: buildpack
+      buildpack_dir: backend
+    run:
+      command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1
+    ports:
+      - port: 8000
+        protocol: http
+    health_checks:
+      - path: /health
+        port: 8000
+    env:
+      - key: PORT
+        value: "8000"
+      - key: ENVIRONMENT
+        value: production
+      - key: TRADING_MODE
+        value: paper

@@ -9,68 +9,101 @@ const config: Config = {
   darkMode: "class",
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-inter)", "Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+        mono: ["var(--font-fira-code)", "Fira Code", "ui-monospace", "JetBrains Mono", "monospace"],
+      },
       colors: {
-        // WeBull palette
         wb: {
-          bg:       "#0D1117",   // page background
-          surface:  "#161A20",   // card / panel
-          surface2: "#1E2329",   // elevated panel
-          surface3: "#252930",   // hovered row / input
-          border:   "#2B2F36",   // subtle border
-          border2:  "#363C45",   // visible border
-          orange:   "#F0A400",   // primary accent (WeBull orange)
-          "orange-dim": "#2D2600", // orange bg tint
-          green:    "#00C076",   // gain / buy
-          "green-dim": "#001F12", // green bg tint
-          red:      "#F6465D",   // loss / sell
-          "red-dim":   "#250A0D", // red bg tint
-          text:     "#EAECEF",   // primary text
-          muted:    "#848E9C",   // secondary text
-          dim:      "#474D57",   // very muted
+          // Backgrounds — deeper OLED blacks with blue-tint (21st.dev feel)
+          bg:       "#09090F",
+          surface:  "#111118",
+          surface2: "#18181F",
+          surface3: "#21212A",
+          // Borders — refined
+          border:   "#27273A",
+          border2:  "#38384F",
+          // Brand accent
+          orange:      "#F0A400",
+          "orange-dim": "#2A2100",
+          // Status
+          green:       "#00C076",
+          "green-dim": "#001B10",
+          red:         "#F6465D",
+          "red-dim":   "#240810",
+          // Typography
+          text:  "#F0F0F8",
+          muted: "#8888A8",
+          dim:   "#44445A",
         },
-        // Legacy aliases (keep existing components working)
+        // Legacy aliases
         ink: {
-          950: "#0D1117",
-          900: "#161A20",
-          800: "#1E2329",
-          700: "#252930",
-          600: "#2B2F36",
+          950: "#09090F",
+          900: "#111118",
+          800: "#18181F",
+          700: "#21212A",
+          600: "#27273A",
         },
-        accent: {
-          DEFAULT: "#F0A400",
-          glow:    "#F5B800",
-          violet:  "#F0A400",
-        },
+        accent: { DEFAULT: "#F0A400", glow: "#F5B800", violet: "#F0A400" },
         pos:  "#00C076",
         neg:  "#F6465D",
         warn: "#F0A400",
       },
-      backgroundImage: {
-        "grid-fade": "none",
-        "glow-radial": "none",
-      },
       boxShadow: {
-        glass: "0 1px 0 inset rgba(255,255,255,0.03), 0 0 0 1px rgba(255,255,255,0.05)",
-        glow:  "0 0 20px -5px rgba(240,164,0,0.35)",
-        card:  "0 2px 8px rgba(0,0,0,0.4)",
+        card:   "0 1px 3px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)",
+        "card-hover": "0 4px 16px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.07)",
+        glow:   "0 0 20px -5px rgba(240,164,0,0.4)",
+        "glow-green": "0 0 16px -4px rgba(0,192,118,0.35)",
+        "glow-red":   "0 0 16px -4px rgba(246,70,93,0.35)",
+        glass:  "inset 0 1px 0 rgba(255,255,255,0.06), 0 1px 3px rgba(0,0,0,0.5)",
+        "inner-top": "inset 0 1px 0 rgba(255,255,255,0.08)",
       },
-      fontFamily: {
-        sans: ["ui-sans-serif", "system-ui", "Inter", "Segoe UI", "Helvetica Neue", "sans-serif"],
-        mono: ["ui-monospace", "SFMono-Regular", "JetBrains Mono", "monospace"],
+      backgroundImage: {
+        "gradient-orange": "linear-gradient(135deg, rgba(240,164,0,0.12), transparent)",
+        "gradient-green":  "linear-gradient(135deg, rgba(0,192,118,0.1), transparent)",
+        "gradient-red":    "linear-gradient(135deg, rgba(246,70,93,0.1), transparent)",
+        "shimmer": "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.05) 50%, transparent 60%)",
       },
       keyframes: {
         pulseGlow: {
-          "0%, 100%": { opacity: "0.7" },
+          "0%, 100%": { opacity: "0.6" },
           "50%":      { opacity: "1" },
         },
         tickerScroll: {
           "0%":   { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
         },
+        fadeIn: {
+          "0%":   { opacity: "0", transform: "translateY(4px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        slideInRight: {
+          "0%":   { opacity: "0", transform: "translateX(8px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
+        },
+        shimmer: {
+          "0%":   { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+        countUp: {
+          "0%":   { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
       },
       animation: {
         pulseGlow:    "pulseGlow 2.4s ease-in-out infinite",
         tickerScroll: "tickerScroll 40s linear infinite",
+        fadeIn:       "fadeIn 0.2s ease-out",
+        slideInRight: "slideInRight 0.2s ease-out",
+        shimmer:      "shimmer 2s ease-in-out infinite",
+        countUp:      "countUp 0.4s ease-out",
+      },
+      borderRadius: {
+        DEFAULT: "6px",
+        sm: "4px",
+        md: "8px",
+        lg: "12px",
+        xl: "16px",
       },
     },
   },

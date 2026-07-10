@@ -1,18 +1,20 @@
+"""Standalone task functions — called by APScheduler (no Celery required).
+Can also be imported and called directly from routes for on-demand execution.
+"""
+from __future__ import annotations
+
 from loguru import logger
 
 from app.agents import AgentContext, DebateEngine
 from app.services.auto_trader import get_auto_trader
 from app.services.market_data import get_market_data
-from app.workers.celery_app import celery_app
-
 
 _engine = DebateEngine()
 
 
-@celery_app.task
 def scan_watchlist(symbols: list[str]) -> dict:
     md = get_market_data()
-    out = {}
+    out: dict = {}
     for sym in symbols:
         try:
             quote = md.quote(sym)
@@ -28,9 +30,8 @@ def scan_watchlist(symbols: list[str]) -> dict:
     return out
 
 
-@celery_app.task
 def autonomous_trade_cycle() -> dict:
-    """Periodic task: run one autonomous scan-decide-execute cycle."""
+    """Run one autonomous scan-decide-execute cycle (sync wrapper)."""
     try:
         trader = get_auto_trader()
         orders = trader.run_cycle()
@@ -40,7 +41,6 @@ def autonomous_trade_cycle() -> dict:
         return {"ok": False, "error": str(e)}
 
 
-@celery_app.task
 def daily_recap() -> dict:
     logger.info("Generating daily recap (stub) — wire to Slack/Discord/email here.")
     return {"ok": True}
