@@ -110,22 +110,16 @@ export default function OraclePage() {
                 )}
               >
                 <div
-                  className={cn(
-                    "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border",
-                    isBot
-                      ? "bg-wb-orange/10 border-wb-orange/20 text-wb-orange"
-                      : "bg-slate-200 border-slate-300 text-slate-600"
-                  )}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border"
+                  style={isBot
+                    ? { backgroundColor: "rgb(var(--wb-orange)/0.1)", borderColor: "rgb(var(--wb-orange)/0.2)", color: "rgb(var(--wb-orange))" }
+                    : { backgroundColor: "#e2e8f0", borderColor: "#cbd5e1", color: "#475569" }}
                 >
                   {isBot ? <Bot className="w-4.5 h-4.5" /> : <User className="w-4.5 h-4.5" />}
                 </div>
                 <div
-                  className={cn(
-                    "rounded-xl px-4 py-3 text-[13px] leading-relaxed shadow-sm border",
-                    isBot
-                      ? "bg-wb-surface2/50 border-wb-border/40 text-wb-text"
-                      : "bg-slate-100 text-slate-900 font-medium border-slate-200"
-                  )}
+                  className={cn("rounded-xl px-4 py-3 text-[13px] leading-relaxed shadow-sm border", isBot ? "bg-wb-surface2/50 border-wb-border/40 text-wb-text" : "")}
+                  style={isBot ? {} : { backgroundColor: "#f1f5f9", borderColor: "#e2e8f0", color: "#1e293b", fontWeight: 500 }}
                 >
                   {/* Handle newlines and markdown-like bold text */}
                   {m.content.split("\n").map((para, pIdx) => {
