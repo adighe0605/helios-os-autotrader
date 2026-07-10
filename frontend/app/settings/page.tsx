@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { AlertTriangle, Power, Save, Shield } from "lucide-react";
+import { AlertTriangle, PlayCircle, Power, Save, Shield } from "lucide-react";
 
 import { api } from "@/lib/api";
 import { cn } from "@/lib/format";
@@ -36,6 +37,22 @@ export default function SettingsPage() {
         <h1 className="text-[18px] font-bold text-wb-text tracking-tight">Settings</h1>
         <p className="text-[12px] text-wb-muted mt-0.5">Configure trading parameters and risk limits</p>
       </div>
+
+      {/* Interactive demo */}
+      <section className="bg-wb-surface border border-wb-border rounded-xl overflow-hidden shadow-card">
+        <div className="px-4 py-3 border-b border-wb-border">
+          <span className="text-[13px] font-semibold text-wb-text">Product Demo</span>
+        </div>
+        <div className="px-4 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+          <p className="text-[13px] text-wb-muted">
+            Watch the guided walkthrough for Dashboard, Trade, AI Agents, Backtest, and Settings.
+          </p>
+          <Link href="/demo" className="btn btn-primary whitespace-nowrap">
+            <PlayCircle className="w-4 h-4" />
+            Open Interactive Demo
+          </Link>
+        </div>
+      </section>
 
       {/* Trading mode */}
       <section className="bg-wb-surface border border-wb-border rounded-xl overflow-hidden shadow-card">
@@ -184,4 +201,3 @@ function NumberField({ label, value, onChange, min, max, step }: {
     </label>
   );
 }
-
