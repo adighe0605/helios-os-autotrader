@@ -210,7 +210,7 @@ export function PennyScanner() {
     const t = Date.now(); setBcToken(t); setBcRefreshAt(new Date(t)); bcSwR.mutate();
   }
 
-  const pennyRows  = pennySwR.data ?? [];
+  const pennyRows  = (pennySwR.data ?? []).slice(0, 10);
   const bcRows     = bcSwR.data ?? [];
 
   return (
@@ -285,7 +285,7 @@ export function PennyScanner() {
           lastRefreshAt={pennyRefreshAt}
           priceFormat={(p) => `$${p.toFixed(4)}`}
           surgeMax={6}
-          emptyMsg="Checking 40 penny stocks"
+          emptyMsg="Top 10 penny stocks by AI score"
         />
       )}
 
