@@ -713,7 +713,7 @@ main { overscroll-behavior-y: auto; }
            transition-all duration-150 cursor-pointer select-none min-w-[44px];
   }
   .btn-primary {
-    @apply btn bg-wb-orange-glow text-black font-semibold hover:brightness-110 active:scale-[0.98];
+    @apply btn bg-accent-glow text-black font-semibold hover:brightness-110 active:scale-[0.98];
   }
   .btn-ghost {
     @apply btn bg-transparent text-wb-muted border border-wb-border
