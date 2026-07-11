@@ -93,8 +93,8 @@
   --wb-surface3: 52 40 94;
   --wb-border: 196 181 253;
   --wb-border2: 221 214 254;
-  --wb-orange: 139 92 246;
-  --wb-orange-glow: 167 139 250;
+  --wb-orange: 167 139 250;
+  --wb-orange-glow: 196 181 253;
   --wb-orange-dim: 36 24 71;
   --wb-green: 74 222 128;
   --wb-green-dim: 20 40 28;
@@ -112,8 +112,8 @@
   --wb-surface3: 237 233 254;
   --wb-border: 109 40 217;
   --wb-border2: 91 33 182;
-  --wb-orange: 124 58 237;
-  --wb-orange-glow: 139 92 246;
+  --wb-orange: 139 92 246;
+  --wb-orange-glow: 167 139 250;
   --wb-orange-dim: 237 233 254;
   --wb-green: 22 163 74;
   --wb-green-dim: 220 252 231;
@@ -179,8 +179,8 @@
   --wb-surface3: 45 52 71;
   --wb-border: 255 255 255;
   --wb-border2: 255 255 255;
-  --wb-orange: 59 130 246;
-  --wb-orange-glow: 96 165 250;
+  --wb-orange: 96 165 250;
+  --wb-orange-glow: 147 197 253;
   --wb-orange-dim: 19 35 68;
   --wb-green: 0 177 106;
   --wb-green-dim: 8 42 29;
@@ -713,20 +713,20 @@ main { overscroll-behavior-y: auto; }
            transition-all duration-150 cursor-pointer select-none min-w-[44px];
   }
   .btn-primary {
-    @apply btn bg-wb-orange text-black font-semibold hover:brightness-110 active:scale-[0.98];
+    @apply btn bg-wb-orange-glow text-black font-semibold hover:brightness-110 active:scale-[0.98];
   }
   .btn-ghost {
     @apply btn bg-transparent text-wb-muted border border-wb-border
-           hover:text-wb-text hover:bg-wb-surface2 hover:border-wb-border2;
+           hover:text-wb-text hover:bg-wb-surface3 hover:border-wb-border2;
   }
   .btn-buy {
-    @apply btn bg-wb-green text-black font-semibold hover:brightness-110 active:scale-[0.98];
+    @apply btn bg-wb-green text-black font-semibold brightness-110 hover:brightness-125 active:scale-[0.98];
   }
   .btn-sell {
-    @apply btn bg-wb-red text-white font-semibold hover:brightness-110 active:scale-[0.98];
+    @apply btn bg-wb-red text-white font-semibold brightness-110 hover:brightness-125 active:scale-[0.98];
   }
   .btn-danger {
-    @apply btn bg-wb-red-dim text-wb-red border border-wb-red/20 hover:bg-wb-red/15;
+    @apply btn bg-wb-red-dim text-wb-red border border-wb-red/30 hover:bg-wb-red/20;
   }
   .btn-sm {
     @apply h-8 px-3 text-[12px] rounded-md;
