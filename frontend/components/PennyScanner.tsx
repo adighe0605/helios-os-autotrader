@@ -211,7 +211,7 @@ export function PennyScanner() {
   }
 
   const pennyRows  = (pennySwR.data ?? []).slice(0, 10);
-  const bcRows     = bcSwR.data ?? [];
+  const bcRows     = (bcSwR.data ?? []).slice(0, 10);
 
   return (
     <div className="bg-wb-surface border border-wb-border rounded-xl overflow-hidden shadow-card">
@@ -298,7 +298,7 @@ export function PennyScanner() {
           lastRefreshAt={bcRefreshAt}
           priceFormat={(p) => `$${p.toFixed(2)}`}
           surgeMax={3}
-          emptyMsg="Checking 40 blue chip stocks"
+          emptyMsg="Top 10 blue chip stocks by AI score"
         />
       )}
     </div>
