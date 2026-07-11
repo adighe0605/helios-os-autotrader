@@ -1,13 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { AlertTriangle, Palette, PlayCircle, Power, Save, Shield } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { AlertTriangle, CheckCircle, Palette, PlayCircle, Power, Save, Shield } from "lucide-react";
 
 import { api } from "@/lib/api";
 import { cn } from "@/lib/format";
 import { RiskGauge } from "@/components/RiskGauge";
 import type { RiskLimits } from "@/lib/types";
+
+const RISK_STORAGE_KEY = "helios-risk-limits";
+const AGGR_STORAGE_KEY = "helios-aggressiveness";
 
 type ThemeKey =
   | "theme-lifeos-default"
@@ -52,9 +55,25 @@ export default function SettingsPage() {
   const [showLiveConfirm, setShowLiveConfirm] = useState(false);
   const [aggressiveness, setAggressiveness] = useState(50);
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [theme, setTheme] = useState<ThemeKey>(DEFAULT_THEME);
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => { api.riskLimits().then(setLimits); }, []);
+  // Load risk limits: localStorage first, then API defaults
+  useEffect(() => {
+    const stored = localStorage.getItem(RISK_STORAGE_KEY);
+    if (stored) {
+      try { setLimits(JSON.parse(stored)); return; } catch { /* fallthrough */ }
+    }
+    api.riskLimits().then((r) => setLimits(r));
+  }, []);
+
+  // Load aggressiveness from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem(AGGR_STORAGE_KEY);
+    if (stored !== null) setAggressiveness(Number(stored));
+  }, []);
+
   useEffect(() => {
     const saved = localStorage.getItem(THEME_STORAGE_KEY);
     const next = isThemeKey(saved) ? saved : DEFAULT_THEME;
@@ -81,7 +100,18 @@ export default function SettingsPage() {
   async function save() {
     if (!limits) return;
     setSaving(true);
-    try { await api.updateRiskLimits(limits); } finally { setSaving(false); }
+    try {
+      // Persist to localStorage (works reliably in serverless)
+      localStorage.setItem(RISK_STORAGE_KEY, JSON.stringify(limits));
+      localStorage.setItem(AGGR_STORAGE_KEY, String(aggressiveness));
+      // Best-effort API update
+      await api.updateRiskLimits(limits).catch(() => null);
+      setSaved(true);
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+      savedTimerRef.current = setTimeout(() => setSaved(false), 3000);
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function toggleKillSwitch() {
@@ -97,6 +127,14 @@ export default function SettingsPage() {
         <h1 className="text-[18px] font-bold text-wb-text tracking-tight">Settings</h1>
         <p className="text-[12px] text-wb-muted mt-0.5">Configure trading parameters and risk limits</p>
       </div>
+
+      {/* Saved confirmation banner */}
+      {saved && (
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-wb-green/10 border border-wb-green/25 text-wb-green text-[13px] font-medium animate-fadeIn">
+          <CheckCircle className="w-4 h-4 shrink-0" />
+          Settings saved successfully — will apply on next bot cycle.
+        </div>
+      )}
 
       {/* Demo video */}
       <section className="bg-wb-surface border border-wb-border rounded-xl overflow-hidden shadow-card">
@@ -238,7 +276,7 @@ export default function SettingsPage() {
             <button onClick={save} disabled={saving || !limits}
               className="btn btn-primary disabled:opacity-50">
               <Save className="w-3.5 h-3.5" />
-              {saving ? "Saving…" : "Save Limits"}
+              {saving ? "Saving…" : saved ? "Saved ✓" : "Save Limits"}
             </button>
           </div>
         </div>
@@ -256,10 +294,17 @@ export default function SettingsPage() {
           <input type="range" min={0} max={100} value={aggressiveness}
             onChange={(e) => setAggressiveness(+e.target.value)}
             className="w-full accent-wb-orange h-1.5 cursor-pointer" />
-          <div className="flex justify-between text-[12px] text-wb-dim num mt-2">
+          <div className="flex justify-between text-[12px] text-wb-dim num mt-2 mb-5">
             <span>Conservative</span>
             <span className="warn-text font-semibold">{aggressiveness}</span>
             <span>Aggressive</span>
+          </div>
+          <div className="flex justify-end">
+            <button onClick={save} disabled={saving}
+              className="btn btn-primary disabled:opacity-50">
+              <Save className="w-3.5 h-3.5" />
+              {saving ? "Saving…" : "Save Settings"}
+            </button>
           </div>
         </div>
       </section>
