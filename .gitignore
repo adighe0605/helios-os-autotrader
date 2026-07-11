@@ -30,3 +30,5 @@ out/
 *.sqlite3
 data/
 backtest-results/
+
+*.tsbuildinfo
