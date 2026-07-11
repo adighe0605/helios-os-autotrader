@@ -117,11 +117,13 @@ export function BacktestForm() {
                   <Tooltip
                     contentStyle={{
                       background: "#18181B",
-                      border: "1px solid rgba(255,255,255,0.08)",
+                      border: "1px solid rgba(255,255,255,0.10)",
                       borderRadius: 10,
                       fontSize: 12,
                       padding: "8px 12px",
                     }}
+                    labelStyle={{ color: "#E4E4E7", fontWeight: 600, marginBottom: 2 }}
+                    itemStyle={{ color: "#A1A1AA" }}
                     formatter={(v: number) => [fmt.usd(v), "Equity"]}
                   />
                   <Area type="monotone" dataKey="equity" stroke="#F59E0B" strokeWidth={2}

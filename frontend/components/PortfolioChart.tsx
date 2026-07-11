@@ -98,11 +98,13 @@ export function PortfolioChart({ data, height = 200 }: { data: Point[]; height?:
               cursor={{ stroke: "rgba(255,255,255,0.08)", strokeWidth: 1, strokeDasharray: "4 4" }}
               contentStyle={{
                 background: "#18181B",
-                border: "1px solid rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.10)",
                 borderRadius: 10,
                 fontSize: 12,
                 padding: "8px 12px",
               }}
+              labelStyle={{ color: "#E4E4E7", fontWeight: 600, marginBottom: 2 }}
+              itemStyle={{ color: "#A1A1AA" }}
               labelFormatter={(v) =>
                 new Date(v as string).toLocaleDateString("en-US", {
                   weekday: "short", month: "short", day: "numeric",
