@@ -5,8 +5,14 @@ them via yfinance to surface the best setups each scan cycle.
 
 Criteria for inclusion in a scan cycle:
   • Price between PENNY_MIN_PRICE and PENNY_MAX_PRICE (default $0.10–$5.00)
-  • Daily volume ≥ PENNY_MIN_VOLUME  (default 300 K)
+  • Daily volume ≥ PENNY_MIN_VOLUME  (default 300 K shares)
   • Volume surge ≥ PENNY_MIN_VOLUME_SURGE × 20-day average volume
+
+Each candidate is then classified into a quality tier:
+  • high_value  — dollar volume ≥ $1M, price ≥ $0.50, RVOL ≥ 1.5×
+                  (institution-fillable, avoids OTC/sub-penny traps)
+  • momentum    — dollar volume ≥ $500K and RVOL ≥ 1.2×
+  • speculative — everything else in penny range
 """
 from __future__ import annotations
 
@@ -72,9 +78,10 @@ class PennyScanner:
         min_surge: Optional[float] = None,
         max_results: int = 40,
     ) -> list[dict]:
-        """Return filtered penny-stock candidates sorted by volume-surge descending.
+        """Return filtered penny-stock candidates sorted by quality descending.
 
-        Each entry: {symbol, price, change_pct, volume, volume_surge, avg_volume}
+        Each entry: {symbol, price, change_pct, volume, volume_surge, avg_volume,
+                     dollar_volume, quality_tier, high_value}
         """
         max_price = max_price if max_price is not None else settings.PENNY_MAX_PRICE
         min_price = min_price if min_price is not None else settings.PENNY_MIN_PRICE
@@ -100,6 +107,21 @@ class PennyScanner:
                 if surge < min_surge:
                     continue
 
+                dollar_volume = quote.price * quote.volume
+
+                # ── Quality tier ─────────────────────────────────────────────
+                high_value = (
+                    dollar_volume >= settings.PENNY_MIN_DOLLAR_VOLUME
+                    and quote.price >= settings.PENNY_HIGH_VALUE_PRICE
+                    and surge >= settings.PENNY_MIN_VOLUME_SURGE
+                )
+                if high_value:
+                    tier = "high_value"
+                elif dollar_volume >= 500_000 and surge >= 1.2:
+                    tier = "momentum"
+                else:
+                    tier = "speculative"
+
                 results.append({
                     "symbol": symbol,
                     "price": quote.price,
@@ -107,11 +129,21 @@ class PennyScanner:
                     "volume": quote.volume,
                     "volume_surge": round(surge, 2),
                     "avg_volume": int(avg_vol),
+                    "dollar_volume": int(dollar_volume),
+                    "quality_tier": tier,
+                    "high_value": high_value,
                 })
             except Exception:
                 continue
 
-        results.sort(key=lambda x: x["volume_surge"], reverse=True)
+        # Rank high-value first, then by liquidity-weighted surge.
+        tier_rank = {"high_value": 0, "momentum": 1, "speculative": 2}
+        results.sort(
+            key=lambda x: (
+                tier_rank.get(x["quality_tier"], 3),
+                -(x["volume_surge"] * (x["dollar_volume"] ** 0.5)),
+            )
+        )
         return results[:max_results]
 
     # ── Volume helper ──────────────────────────────────────────────────────────

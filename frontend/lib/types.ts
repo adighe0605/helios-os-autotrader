@@ -159,6 +159,8 @@ export type NewsItem = {
   sentiment: number | null;
 };
 
+export type QualityTier = "high_value" | "momentum" | "speculative";
+
 export type ScanCandidate = {
   symbol: string;
   price: number;
@@ -172,6 +174,12 @@ export type ScanCandidate = {
   take_profit: number | null;
   summary: string;
   scanned_at: string;
+  // High-value screening fields (penny scan)
+  dollar_volume?: number;
+  quality_tier?: QualityTier;
+  high_value?: boolean;
+  factors?: string[];
+  asset_type?: "penny" | "blue_chip";
 };
 
 export type AutoTradeRecord = {

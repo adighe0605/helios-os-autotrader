@@ -11,6 +11,7 @@ import { AIInsights } from "@/components/AIInsights";
 import { AutoTradePanel } from "@/components/AutoTradePanel";
 import { TradingStrategyCard } from "@/components/TradingStrategyCard";
 import { PennyScanner } from "@/components/PennyScanner";
+import { HighValuePicks } from "@/components/HighValuePicks";
 import { PortfolioChart } from "@/components/PortfolioChart";
 import { PositionsTable } from "@/components/PositionsTable";
 import { StatCard } from "@/components/StatCard";
@@ -148,6 +149,7 @@ export default function DashboardPage() {
         </div>
         <div className="space-y-4">
           <AutoTradePanel />
+          <HighValuePicks />
           <TradingStrategyCard />
           <AIInsights
             headline="Volume surge activity in small-caps"

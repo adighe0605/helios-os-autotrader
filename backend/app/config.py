@@ -59,6 +59,8 @@ class Settings(BaseSettings):
     PENNY_MIN_VOLUME: int = 300_000         # minimum daily volume for safety
     PENNY_MIN_VOLUME_SURGE: float = 1.5     # current vol must be ≥ X × 20-day avg vol
     PENNY_MAX_SPREAD_PCT: float = 3.0       # skip if bid-ask spread > 3% of price
+    PENNY_MIN_DOLLAR_VOLUME: float = 1_000_000.0  # ≥ $1M traded/day → institution-fillable
+    PENNY_HIGH_VALUE_PRICE: float = 0.50    # high-value tier requires price ≥ this (no OTC junk)
 
     # Notifications
     SLACK_WEBHOOK_URL: str = ""
