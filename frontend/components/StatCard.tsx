@@ -11,6 +11,7 @@ type Props = {
   icon?: LucideIcon;
   accent?: "default" | "pos" | "neg" | "warn";
   onClick?: () => void;
+  badge?: string;
 };
 
 const accentGradient: Record<string, string> = {
@@ -27,7 +28,7 @@ const iconBg: Record<string, string> = {
   warn:    "bg-wb-orange/10 text-wb-orange",
 };
 
-export function StatCard({ label, value, delta, deltaPrefix, icon: Icon, accent = "default", onClick }: Props) {
+export function StatCard({ label, value, delta, deltaPrefix, icon: Icon, accent = "default", onClick, badge }: Props) {
   const pos = (delta ?? 0) >= 0;
 
   return (
@@ -70,6 +71,16 @@ export function StatCard({ label, value, delta, deltaPrefix, icon: Icon, accent 
             )}>
               {pos ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
               {deltaPrefix ?? ""}{fmt.pct(delta)}
+            </span>
+          </div>
+        )}
+
+        {/* Status badge (e.g. "Market closed") */}
+        {badge && (
+          <div className="mt-2">
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-wb-surface3 text-wb-muted">
+              <span className="w-1.5 h-1.5 rounded-full bg-wb-dim" />
+              {badge}
             </span>
           </div>
         )}

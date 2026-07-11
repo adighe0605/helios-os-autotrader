@@ -56,13 +56,17 @@ export default function DashboardPage() {
     },
     day_pnl: {
       title: "Today's Profit & Loss",
-      desc: "The dollar amount and percentage return your portfolio has gained or lost today relative to yesterday's market close. This is calculated dynamically in real-time as asset prices fluctuate.",
+      desc: portfolio?.market_open
+        ? "The dollar amount and percentage return your portfolio has gained or lost today relative to yesterday's market close. This is calculated dynamically in real-time as asset prices fluctuate."
+        : "The market is currently closed, so today's session hasn't started — Day P&L is $0.00 until the next open. Alpaca's equity is frozen at the last close. Your most recent completed session's result is shown below for reference.",
       formula: "Day P&L = Current Portfolio Value - Yesterday's Close Value",
-      source: "Alpaca Account API (v2)",
+      source: "Alpaca Account API (v2) + Market Clock",
       metrics: [
         { label: "Daily Return (USD)", value: portfolio ? fmt.usd(portfolio.day_pnl) : "—", highlight: true, pos: (portfolio?.day_pnl ?? 0) >= 0 },
         { label: "Daily Return (%)", value: portfolio ? fmt.pct(portfolio.day_pnl_pct) : "—", pos: (portfolio?.day_pnl_pct ?? 0) >= 0 },
-        { label: "Starting Day Equity", value: portfolio ? fmt.usd(portfolio.portfolio_value - portfolio.day_pnl) : "—" },
+        { label: "Market Status", value: portfolio ? (portfolio.market_open ? "Open" : "Closed") : "—" },
+        { label: "Last Session P&L", value: portfolio?.last_session_pnl !== undefined ? fmt.usd(portfolio.last_session_pnl) : "—", pos: (portfolio?.last_session_pnl ?? 0) >= 0 },
+        { label: "Starting Day Equity", value: portfolio ? fmt.usd(portfolio.portfolio_value - (portfolio.last_session_pnl ?? portfolio.day_pnl)) : "—" },
       ]
     },
     total_pnl: {
@@ -118,9 +122,10 @@ export default function DashboardPage() {
         <StatCard
           label="Day P&L"
           value={portfolio ? fmt.usd(portfolio.day_pnl) : "—"}
-          delta={portfolio?.day_pnl_pct}
+          delta={portfolio?.market_open ? portfolio?.day_pnl_pct : undefined}
           accent={(portfolio?.day_pnl ?? 0) >= 0 ? "pos" : "neg"}
           icon={DollarSign}
+          badge={portfolio && !portfolio.market_open ? "Market closed" : undefined}
           onClick={() => setSelectedMetric("day_pnl")}
         />
         <StatCard

@@ -10,6 +10,10 @@ export type Portfolio = {
   total_pnl: number;
   total_pnl_pct: number;
   mode: Mode;
+  market_open?: boolean;
+  last_session_pnl?: number;
+  last_session_pnl_pct?: number;
+  next_open?: string | null;
 };
 
 export type Position = {

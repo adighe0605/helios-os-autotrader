@@ -41,6 +41,38 @@ async function getAccount(): Promise<AlpacaAccount> {
   return tradingFetch<AlpacaAccount>("/v2/account");
 }
 
+type MarketClock = { is_open: boolean; next_open: string; next_close: string };
+
+async function getMarketClock(): Promise<MarketClock | null> {
+  try {
+    return await tradingFetch<MarketClock>("/v2/clock");
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Session-aware Day P&L. Alpaca's `last_equity` only rolls forward at market
+ * OPEN, so between sessions `equity - last_equity` reflects the LAST completed
+ * session, not "today". While the market is closed, today's Day P&L is $0.00.
+ */
+function computeDayPnl(acc: AlpacaAccount, clock: MarketClock | null) {
+  const equity = parseFloat(acc.equity);
+  const lastEquity = parseFloat(acc.last_equity);
+  const sessionPnl = equity - lastEquity;
+  const sessionPct = lastEquity > 0 ? (sessionPnl / lastEquity) * 100 : 0;
+  const marketOpen = clock?.is_open ?? false;
+  return {
+    equity,
+    lastEquity,
+    marketOpen,
+    dayPnl: marketOpen ? sessionPnl : 0,
+    dayPct: marketOpen ? sessionPct : 0,
+    sessionPnl,
+    sessionPct,
+  };
+}
+
 async function getPositions(): Promise<AlpacaPosition[]> {
   return tradingFetch<AlpacaPosition[]>("/v2/positions");
 }
@@ -122,15 +154,13 @@ export async function POST(req: NextRequest) {
   try {
     // ── 0. EXPLAIN P&L / WHY questions ─────────────────────────────────────
     if (matchesAny(p, ["why", "how did i make", "how did i gain", "how did i earn", "explain", "where did", "what caused", "if zero trades", "0 trades", "no trades"])) {
-      const [acc, positions, fills] = await Promise.all([
+      const [acc, positions, fills, clock] = await Promise.all([
         getAccount(),
         getPositions(),
         getRecentFills(1),
+        getMarketClock(),
       ]);
-      const equity = parseFloat(acc.equity);
-      const lastEquity = parseFloat(acc.last_equity);
-      const dayPnl = equity - lastEquity;
-      const dayPct = lastEquity > 0 ? (dayPnl / lastEquity) * 100 : 0;
+      const { equity, lastEquity, dayPnl, dayPct, marketOpen, sessionPnl, sessionPct } = computeDayPnl(acc, clock);
       const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
       const todayFills = fills.filter((f) => f.transaction_time && new Date(f.transaction_time) >= todayStart);
 
@@ -143,34 +173,35 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         response:
           `### 📊 Why Do I Have P&L With No Trades?\n\n` +
-          `**Source:** Alpaca Account API + Positions API\n\n` +
-          `**Day P&L: \`${fmt(dayPnl)}\` (${fmtPct(dayPct)}) — this is 100% unrealized, not from new trades.**\n\n` +
+          `**Source:** Alpaca Account API + Positions API + Market Clock\n\n` +
+          (marketOpen
+            ? `**Day P&L: \`${fmt(dayPnl)}\` (${fmtPct(dayPct)}) — this is 100% unrealized, not from new trades.**\n\n`
+            : `**Day P&L: \`${fmt(0)}\` — the market is currently closed, so today's session hasn't started.**\n\n` +
+              `Your last completed session finished at \`${fmt(sessionPnl)}\` (${fmtPct(sessionPct)}). That figure is frozen until the next open.\n\n`) +
           `#### How this works:\n` +
-          `Day P&L measures the change in your **total portfolio value** since yesterday's market close. Even with **${todayFills.length} new fills today**, your existing open positions change in value as prices move.\n\n` +
+          `Day P&L measures the change in your **total portfolio value** since the previous market close, and only accrues while the market is **open**. Even with **${todayFills.length} new fills today**, your existing open positions change in value as prices move during the session.\n\n` +
           `Think of it like owning a house — if property prices rise today, you are "up" even though you made no transactions.\n\n` +
           (positions.length > 0
-            ? `#### Your ${positions.length} Open Position${positions.length > 1 ? "s" : ""} driving today's P&L:\n${posLines}\n\n`
+            ? `#### Your ${positions.length} Open Position${positions.length > 1 ? "s" : ""} driving session P&L:\n${posLines}\n\n`
             : "") +
           `#### The math:\n` +
-          `• Yesterday closing equity: \`$${lastEquity.toLocaleString("en-US", { minimumFractionDigits: 2 })}\`\n` +
-          `• Today current equity: \`$${equity.toLocaleString("en-US", { minimumFractionDigits: 2 })}\`\n` +
-          `• Difference (Day P&L): \`${fmt(dayPnl)}\`\n\n` +
+          `• Previous close equity: \`$${lastEquity.toLocaleString("en-US", { minimumFractionDigits: 2 })}\`\n` +
+          `• Current equity: \`$${equity.toLocaleString("en-US", { minimumFractionDigits: 2 })}\`\n` +
+          `• Market status: \`${marketOpen ? "Open" : "Closed"}\`\n\n` +
           `This P&L becomes **realized** only when you close (sell) the position.`,
       });
     }
 
     // ── 1. TODAY'S PERFORMANCE ──────────────────────────────────────────────
     if (matchesAny(p, ["today", "how did i do", "make today", "do today", "daily", "day pnl", "day p&l"])) {
-      const [acc, positions, fills] = await Promise.all([
+      const [acc, positions, fills, clock] = await Promise.all([
         getAccount(),
         getPositions(),
         getRecentFills(1),
+        getMarketClock(),
       ]);
 
-      const equity = parseFloat(acc.equity);
-      const lastEquity = parseFloat(acc.last_equity);
-      const dayPnl = equity - lastEquity;
-      const dayPct = lastEquity > 0 ? (dayPnl / lastEquity) * 100 : 0;
+      const { equity, dayPnl, dayPct, marketOpen, sessionPnl, sessionPct } = computeDayPnl(acc, clock);
 
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
@@ -182,22 +213,29 @@ export async function POST(req: NextRequest) {
       const sells = todayFills.filter((f) => f.side === "sell" || f.side === "sell_short").length;
 
       // Explain the difference between unrealized mark-to-market and actual fills
-      const pnlSource = todayFills.length === 0 && positions.length > 0
-        ? `\n\n💡 **Why do I have P&L with 0 trades?**\nDay P&L comes from **mark-to-market movement** on your ${positions.length} open position${positions.length > 1 ? "s" : ""}. Even with no new trades today, your held shares gained/lost value as the market moved. This is unrealized P&L — it becomes realized only when you sell.`
-        : "";
+      const pnlSource = !marketOpen
+        ? `\n\n🌙 **Market is closed.** Today's session hasn't started, so Day P&L is \`$0.00\`. Your last completed session finished at \`${fmt(sessionPnl)}\` (${fmtPct(sessionPct)}). Day P&L will start moving again at the next open.`
+        : todayFills.length === 0 && positions.length > 0
+          ? `\n\n💡 **Why do I have P&L with 0 trades?**\nDay P&L comes from **mark-to-market movement** on your ${positions.length} open position${positions.length > 1 ? "s" : ""}. Even with no new trades today, your held shares gained/lost value as the market moved. This is unrealized P&L — it becomes realized only when you sell.`
+          : "";
+
+      const sentiment = !marketOpen
+        ? `⚪ Market closed — Day P&L resets to $0.00 until the next session opens.`
+        : dayPnl >= 0
+          ? `🟢 Your portfolio is up today — driven by price movement on existing holdings.`
+          : `🔴 Your portfolio is down today — existing holdings moved against you.`;
 
       return NextResponse.json({
         response:
           `### 📈 Today's Performance\n\n` +
-          `**Source:** Alpaca Account API (live paper account)\n\n` +
+          `**Source:** Alpaca Account API + Market Clock (live paper account)\n\n` +
           `• **Day P&L:** \`${fmt(dayPnl)}\` (${fmtPct(dayPct)})\n` +
+          `• **Market Status:** \`${marketOpen ? "Open" : "Closed"}\`\n` +
           `• **Portfolio Value:** \`$${equity.toLocaleString("en-US", { minimumFractionDigits: 2 })}\`\n` +
           `• **Cash Available:** \`$${parseFloat(acc.cash).toLocaleString("en-US", { minimumFractionDigits: 2 })}\`\n` +
           `• **Fills Today:** \`${todayFills.length}\` (${buys} buys · ${sells} sells)\n` +
           `• **Open Positions:** \`${positions.length}\` (generating unrealized P&L)\n\n` +
-          (dayPnl >= 0
-            ? `🟢 Your portfolio is up today — driven by price movement on existing holdings.`
-            : `🔴 Your portfolio is down today — existing holdings moved against you.`) +
+          sentiment +
           pnlSource,
       });
     }
