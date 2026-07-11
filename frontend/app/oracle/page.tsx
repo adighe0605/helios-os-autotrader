@@ -21,7 +21,7 @@ const SUGGESTED_PROMPTS = [
   "How much risk am I currently taking?",
 ];
 
-// v2
+// v3 cache-bust 2026-07-11
 export default function OraclePage() {
   const WELCOME = "Hello! I am **Oracle AI** — powered by trading intelligence & the same AI agents that run your trading bot.\n\nI can answer questions using **real agent signals** (PennyMomentumAgent · MeanReversionAgent · SentimentAgent · RiskAgent · IntradayAgent)\n\nAsk me anything!";
 

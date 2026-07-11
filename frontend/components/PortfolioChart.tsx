@@ -1,5 +1,5 @@
 "use client";
-// v3 tooltip-contrast-fix
+// v4 tooltip-contrast-fix 2026-07-11
 import { useState } from "react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { fmt } from "@/lib/format";

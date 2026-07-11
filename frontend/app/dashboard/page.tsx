@@ -1,5 +1,5 @@
 "use client";
-
+// v2 2026-07-11
 import { useState } from "react";
 import useSWR from "swr";
 import { DollarSign, Percent, ShieldCheck, Wallet, X } from "lucide-react";
